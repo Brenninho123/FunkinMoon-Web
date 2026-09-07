@@ -1,8 +1,8 @@
-const APP_VERSION = 'v9';
+const APP_VERSION = 'v10';
 const CORE_CACHE = `moon-core-${APP_VERSION}`;
 const MEDIA_CACHE = `moon-media-${APP_VERSION}`;
 const DYNAMIC_CACHE = `moon-dynamic-${APP_VERSION}`;
-const MAX_DYNAMIC_ITEMS = 150;
+const MAX_DYNAMIC_ITEMS = 200;
 
 const CORE_ASSETS = [
     './',
@@ -16,6 +16,7 @@ const CORE_ASSETS = [
     './assets/images/mainmenu/options.png',
     './assets/sounds/scrollMenu.ogg',
     './assets/sounds/confirmMenu.ogg',
+    './assets/sounds/cancelMenu.ogg',
     './source/funkin/Version.js',
     './source/funkin/Preferences.js',
     './source/funkin/save/Save.js',
@@ -27,6 +28,7 @@ const CORE_ASSETS = [
     './source/funkin/ui/community/CommunityMenu.js',
     './source/funkin/ui/options/OptionsState.js',
     './source/funkin/ui/debug/FunkinDebugDisplay.js',
+    './source/funkin/ui/freeplay/FreeplayState.js',
     './source/funkin/play/PlayState.js',
     './source/Main.js'
 ];
@@ -126,29 +128,6 @@ self.addEventListener('fetch', (event) => {
             return cached || networkPromise;
         })
     );
-});
-
-self.addEventListener('sync', (event) => {
-    if (event.tag === 'sync-moon-data') {
-        event.waitUntil(Promise.resolve());
-    }
-});
-
-self.addEventListener('push', (event) => {
-    const data = event.data ? event.data.json() : { title: 'MoonEngine', body: 'System Notification' };
-    event.waitUntil(
-        self.registration.showNotification(data.title, {
-            body: data.body,
-            icon: './assets/images/iconMoon.png',
-            badge: './assets/images/iconMoon.png',
-            vibrate: [200, 100, 200]
-        })
-    );
-});
-
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(clients.openWindow('/'));
 });
 
 self.addEventListener('message', (event) => {
