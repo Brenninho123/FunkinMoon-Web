@@ -637,7 +637,7 @@
 
         <div id="storyDocument" class="document-modal">
             <h2>📜 Moon Engine Specification Document</h2>
-            <p><strong>Version:</strong> Web Edition v1.0.0</p>
+            <p><strong>Version:</strong> Web Edition v1.2.0</p>
             <p><strong>Architecture:</strong> WebGL accelerated canvas with asynchronous chart parsing and event-driven Lua script handling.</p>
             <p><strong>Status:</strong> Engine initialized. PWA caching active with offline mode support.</p>
         </div>
@@ -691,6 +691,7 @@
     <script>
         let discordAuth;
         let communitySystem = null;
+        let debugDisplay = null;
         let selectedOption = null;
         let clickCounts = { story: 0, freeplay: 0, options: 0 };
 
@@ -739,9 +740,14 @@
                     triggerFlash();
                     playSound('confirmMenu');
 
-                    docModal.classList.toggle('active', opt === 'story');
-                    communityContainer.classList.toggle('active', opt === 'freeplay');
-                    optionsPanel.classList.toggle('active', opt === 'options');
+                    if (opt === 'freeplay' && window.moonEngine && typeof FreeplayState !== 'undefined') {
+                        const freeplayState = new FreeplayState(window.moonEngine);
+                        window.moonEngine.switchState(freeplayState);
+                    } else {
+                        docModal.classList.toggle('active', opt === 'story');
+                        communityContainer.classList.toggle('active', opt === 'freeplay');
+                        optionsPanel.classList.toggle('active', opt === 'options');
+                    }
                 }
             }
         }
@@ -920,6 +926,15 @@
             MoonProject.loadScriptSequence(() => {
                 if (typeof DiscordLogin !== 'undefined') {
                     discordAuth = new DiscordLogin();
+                }
+
+                if (typeof FunkinDebugDisplay !== 'undefined' && window.moonEngine) {
+                    debugDisplay = new FunkinDebugDisplay(window.moonEngine);
+                    window.addEventListener('keydown', (e) => {
+                        if (e.key === 'F3') {
+                            debugDisplay.toggle();
+                        }
+                    });
                 }
 
                 updateDiscordUI();
