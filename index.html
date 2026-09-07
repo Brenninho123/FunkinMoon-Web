@@ -2,15 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MoonEngine - Web Edition</title>
     <link rel="icon" type="image/png" href="assets/images/iconMoon.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#7b2cbf">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
             --bg-dark: #03050a;
-            --card-bg: rgba(13, 17, 33, 0.78);
+            --card-bg: rgba(13, 17, 33, 0.85);
             --border-glow: rgba(157, 78, 221, 0.35);
             --moon-glow: #e0aaff;
             --accent-purple: #7b2cbf;
@@ -26,6 +29,8 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         body {
@@ -35,7 +40,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 40px 20px;
+            padding: clamp(10px, 3vw, 40px);
             overflow-x: hidden;
             position: relative;
         }
@@ -68,8 +73,8 @@
             background: var(--card-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: 24px;
-            padding: 45px 35px;
+            border-radius: clamp(16px, 4vw, 24px);
+            padding: clamp(20px, 4vw, 45px);
             box-shadow: 0 0 70px rgba(123, 44, 191, 0.3), 0 30px 60px rgba(0, 0, 0, 0.9);
             border: 1px solid var(--border-glow);
             text-align: center;
@@ -79,61 +84,55 @@
 
         .user-bar {
             position: absolute;
-            top: 25px;
-            right: 25px;
+            top: 20px;
+            right: 20px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
+            z-index: 10;
         }
 
         .discord-btn {
             background: var(--discord-blue);
             color: #ffffff;
             border: none;
-            padding: 10px 18px;
-            font-size: 0.9rem;
+            padding: 8px 14px;
+            font-size: 0.85rem;
             font-weight: 600;
             border-radius: 10px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             transition: all 0.3s ease;
         }
 
-        .discord-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
-        }
-
         .discord-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             fill: currentColor;
         }
 
         .user-profile {
             display: none;
             align-items: center;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 6px 14px;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 12px;
             border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             object-fit: cover;
         }
 
         .user-name {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
-            color: var(--text-main);
         }
 
         .logout-btn {
@@ -141,101 +140,76 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.8rem;
-            margin-left: 5px;
-        }
-
-        .logout-btn:hover {
-            color: #ff4d4d;
+            font-size: 0.9rem;
+            margin-left: 4px;
         }
 
         .header-logo-container {
             position: relative;
             display: inline-block;
-            margin-bottom: 20px;
-        }
-
-        .header-logo-container::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 140px;
-            height: 140px;
-            background: radial-gradient(circle, var(--accent-light) 0%, transparent 70%);
-            opacity: 0.5;
-            filter: blur(25px);
-            z-index: -1;
-            animation: pulseGlow 4s ease-in-out infinite alternate;
-        }
-
-        @keyframes pulseGlow {
-            0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.3; }
-            100% { transform: translate(-50%, -50%) scale(1.25); opacity: 0.7; }
+            margin-bottom: 15px;
+            margin-top: 20px;
         }
 
         .header-logo {
-            width: 120px;
-            height: 120px;
+            width: clamp(80px, 15vw, 120px);
+            height: clamp(80px, 15vw, 120px);
             object-fit: contain;
             filter: drop-shadow(0 0 20px rgba(224, 170, 255, 0.5));
-            transition: transform 0.4s ease;
-        }
-
-        .header-logo:hover {
-            transform: scale(1.08) rotate(4deg);
         }
 
         h1 {
-            font-size: 3.2rem;
+            font-size: clamp(2rem, 6vw, 3.2rem);
             font-weight: 800;
             letter-spacing: -1px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             background: linear-gradient(135deg, #ffffff 20%, var(--moon-glow) 60%, var(--accent-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
-            font-size: 1.1rem;
+            font-size: clamp(0.8rem, 2.5vw, 1.1rem);
             color: var(--cyan-accent);
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             font-weight: 700;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .nav-tabs {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
+            justify-content: flex-start;
+            gap: 8px;
+            margin-bottom: 25px;
             background: rgba(0, 0, 0, 0.4);
             padding: 6px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            flex-wrap: wrap;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
         }
 
         .tab-btn {
             background: transparent;
             border: none;
             color: var(--text-muted);
-            padding: 10px 24px;
-            font-size: 0.95rem;
+            padding: 10px 18px;
+            font-size: 0.9rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active, .tab-btn:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
         .tab-btn.active {
+            color: #ffffff;
             background: var(--accent-purple);
             box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
         }
@@ -243,7 +217,7 @@
         .tab-content {
             display: none;
             text-align: left;
-            animation: fadeIn 0.4s ease forwards;
+            animation: fadeIn 0.3s ease forwards;
         }
 
         .tab-content.active {
@@ -251,19 +225,20 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .game-viewport {
             width: 100%;
-            height: 520px;
+            height: clamp(300px, 55vh, 520px);
             background: #000000;
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid var(--border-glow);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             position: relative;
+            touch-action: none;
         }
 
         #gameCanvas {
@@ -274,46 +249,41 @@
 
         .community-layout {
             display: grid;
-            grid-template-columns: 260px 1fr;
-            gap: 20px;
-            height: 480px;
+            grid-template-columns: 240px 1fr;
+            gap: 15px;
+            height: clamp(380px, 50vh, 480px);
         }
 
         .community-sidebar {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 15px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .sidebar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
             color: var(--moon-glow);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         .create-btn {
             background: var(--accent-purple);
             color: #ffffff;
             border: none;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 700;
-            transition: background 0.2s;
-        }
-
-        .create-btn:hover {
-            background: var(--accent-light);
         }
 
         .community-list {
@@ -322,27 +292,26 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 6px;
         }
 
         .community-item {
-            padding: 10px 12px;
+            padding: 10px;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.02);
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            transition: all 0.2s ease;
         }
 
-        .community-item.active, .community-item:hover {
-            background: rgba(157, 78, 221, 0.2);
+        .community-item.active {
+            background: rgba(157, 78, 221, 0.25);
             color: var(--text-main);
         }
 
         .chat-container {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
+            border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
@@ -351,49 +320,33 @@
 
         .chat-messages {
             flex-grow: 1;
-            padding: 20px;
+            padding: 15px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .chat-message {
             display: flex;
-            gap: 10px;
-            font-size: 0.9rem;
+            gap: 8px;
+            font-size: 0.85rem;
         }
 
         .chat-avatar {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: var(--accent-purple);
             object-fit: cover;
         }
 
-        .chat-body {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-sender {
-            font-weight: 700;
-            color: var(--cyan-accent);
-            font-size: 0.8rem;
-        }
-
-        .chat-text {
-            color: var(--text-main);
-            margin-top: 2px;
-        }
-
         .chat-input-bar {
             display: flex;
-            padding: 12px;
+            padding: 10px;
             background: rgba(0, 0, 0, 0.4);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            gap: 10px;
+            gap: 8px;
         }
 
         .chat-input {
@@ -401,29 +354,25 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
-            padding: 10px 14px;
+            padding: 8px 12px;
             color: #ffffff;
             outline: none;
+            font-size: 0.9rem;
         }
 
         .chat-send-btn {
             background: var(--accent-purple);
             color: #ffffff;
             border: none;
-            padding: 0 18px;
+            padding: 0 14px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .chat-send-btn:hover {
-            background: var(--accent-light);
         }
 
         .options-container {
             background: rgba(0, 0, 0, 0.25);
-            padding: 24px;
+            padding: 20px;
             border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.04);
         }
@@ -432,30 +381,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
+            padding: 14px;
             background: rgba(255, 255, 255, 0.02);
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .option-label {
-            font-size: 1.05rem;
+            font-size: 0.95rem;
             font-weight: 600;
-            color: var(--text-main);
         }
 
         .option-control {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .option-value {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--cyan-accent);
-            min-width: 60px;
+            min-width: 45px;
             text-align: center;
         }
 
@@ -463,215 +411,79 @@
             background: var(--accent-purple);
             color: #ffffff;
             border: none;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 8px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .opt-btn:hover {
-            background: var(--accent-light);
-            transform: scale(1.05);
-        }
-
-        .description {
-            font-size: 1.05rem;
-            line-height: 1.7;
-            color: var(--text-muted);
-            background: rgba(255, 255, 255, 0.02);
-            padding: 24px;
-            border-radius: 16px;
-            border-left: 4px solid var(--accent-purple);
-            margin-bottom: 30px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.02);
-            padding: 18px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stat-card .number {
-            font-size: 1.6rem;
-            font-weight: 800;
-            color: var(--cyan-accent);
-        }
-
-        .stat-card .label {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-
-        .feature-card {
-            background: rgba(255, 255, 255, 0.025);
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.04);
-            border-color: var(--accent-light);
-            box-shadow: 0 10px 20px rgba(123, 44, 191, 0.2);
-        }
-
-        .feature-card h3 {
-            font-size: 1.15rem;
-            color: var(--moon-glow);
-            margin-bottom: 10px;
-        }
-
-        .feature-card p {
-            font-size: 0.92rem;
-            color: var(--text-muted);
-            line-height: 1.5;
         }
 
         .btn-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 35px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-top: 25px;
+            margin-bottom: 15px;
             flex-wrap: wrap;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-light));
             color: #ffffff;
-            padding: 16px 36px;
-            font-size: 1.05rem;
+            padding: 12px 24px;
+            font-size: 0.95rem;
             font-weight: 700;
             text-decoration: none;
-            border-radius: 14px;
-            box-shadow: 0 4px 25px rgba(123, 44, 191, 0.5);
-            transition: all 0.3s ease;
+            border-radius: 12px;
             cursor: pointer;
             border: none;
-        }
-
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 35px rgba(157, 78, 221, 0.7);
-        }
-
-        .btn svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
         }
 
         .btn-install {
             background: linear-gradient(135deg, #00f5d4, #00bbf9);
             color: #03050a;
-            box-shadow: 0 4px 25px rgba(0, 245, 212, 0.4);
             display: none;
         }
 
-        .btn-install:hover {
-            box-shadow: 0 8px 35px rgba(0, 245, 212, 0.6);
-        }
-
-        .credits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        .credits-group {
-            background: rgba(0, 0, 0, 0.25);
-            padding: 22px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .credits-group h3 {
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: var(--moon-glow);
-            border-bottom: 1px solid var(--border-glow);
-            padding-bottom: 8px;
-        }
-
-        .credits-group h4 {
-            font-size: 1.05rem;
-            margin: 15px 0 10px 0;
-            color: var(--cyan-accent);
-        }
-
-        .credits-list {
-            list-style: none;
-        }
-
-        .credits-list li {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .credits-list li strong {
-            color: var(--text-main);
-        }
-
-        .credits-list a {
-            color: var(--moon-glow);
-            text-decoration: none;
-        }
-
-        .credits-list a:hover {
-            text-decoration: underline;
-            color: var(--cyan-accent);
-        }
-
-        .note {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-            line-height: 1.5;
+        .btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
         }
 
         footer {
-            margin-top: 40px;
-            font-size: 0.85rem;
+            margin-top: 30px;
+            font-size: 0.8rem;
             color: var(--text-muted);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 25px;
-            text-align: center;
+            padding-top: 20px;
         }
 
-        @media (max-width: 700px) {
-            .community-layout { grid-template-columns: 1fr; height: auto; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .container { padding: 30px 20px; }
-            h1 { font-size: 2.2rem; }
-            .game-viewport { height: 360px; }
-            .user-bar { position: relative; top: 0; right: 0; justify-content: center; margin-bottom: 20px; }
+        @media (max-width: 768px) {
+            .user-bar {
+                position: relative;
+                top: 0;
+                right: 0;
+                justify-content: center;
+                margin-bottom: 10px;
+            }
+
+            .community-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .community-sidebar {
+                max-height: 150px;
+            }
+
+            .chat-container {
+                height: 300px;
+            }
         }
     </style>
 </head>
@@ -686,7 +498,7 @@
                 <svg viewBox="0 0 24 24">
                     <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                 </svg>
-                Login with Discord
+                Discord
             </button>
             <div id="userProfile" class="user-profile">
                 <img id="userAvatar" class="user-avatar" src="" alt="Avatar">
@@ -699,16 +511,15 @@
             <img src="assets/images/iconMoon.png" alt="MoonEngine Logo" class="header-logo">
         </div>
         
-        <h1>MoonEngine - Web</h1>
+        <h1>MoonEngine</h1>
         <p class="subtitle">Next-Gen Rhythm Gaming Engine</p>
 
         <nav class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('game')">Play Engine</button>
-            <button class="tab-btn" onclick="switchTab('community')">Community</button>
-            <button class="tab-btn" onclick="switchTab('options')">Options</button>
-            <button class="tab-btn" onclick="switchTab('overview')">Overview</button>
-            <button class="tab-btn" onclick="switchTab('features')">Features</button>
-            <button class="tab-btn" onclick="switchTab('credits')">Credits</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'game')">Play Engine</button>
+            <button class="tab-btn" onclick="switchTab(event, 'community')">Community</button>
+            <button class="tab-btn" onclick="switchTab(event, 'options')">Options</button>
+            <button class="tab-btn" onclick="switchTab(event, 'overview')">Overview</button>
+            <button class="tab-btn" onclick="switchTab(event, 'features')">Features</button>
         </nav>
 
         <div id="game" class="tab-content active">
@@ -724,12 +535,10 @@
                         <span>Communities</span>
                         <button class="create-btn" onclick="createNewCommunityPrompt()">+</button>
                     </div>
-                    <ul id="communityList" class="community-list">
-                    </ul>
+                    <ul id="communityList" class="community-list"></ul>
                 </div>
                 <div class="chat-container">
-                    <div id="chatMessages" class="chat-messages">
-                    </div>
+                    <div id="chatMessages" class="chat-messages"></div>
                     <div class="chat-input-bar">
                         <input type="text" id="chatInput" class="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter') sendChatMessage()">
                         <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
@@ -752,89 +561,25 @@
         </div>
 
         <div id="overview" class="tab-content">
-            <div class="description">
-                MoonEngine Web is a high-performance rhythm game framework engineered to execute custom charts, complex character animations, and Lua/Haxe stage events directly inside web browsers.
-            </div>
-
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="number">60+ FPS</div>
-                    <div class="label">Smooth Performance</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">WebGL</div>
-                    <div class="label">Hardware Acceleration</div>
-                </div>
-                <div class="stat-card">
-                    <div class="number">Low Latency</div>
-                    <div class="label">Responsive Controls</div>
-                </div>
-            </div>
+            <p style="color: var(--text-muted); line-height: 1.6;">MoonEngine Web is built for high performance, custom chart support, and WebGL rendering directly inside modern mobile and desktop browsers.</p>
         </div>
 
         <div id="features" class="tab-content">
-            <div class="features-grid">
-                <div class="feature-card">
-                    <h3>🌙 Optimized WebGL</h3>
-                    <p>Hardware-accelerated rendering tailored for seamless execution across desktop and mobile browsers.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>⚙️ Scripting System</h3>
-                    <p>Modular event callbacks and stage configuration via custom Lua and Haxe scripts.</p>
-                </div>
-                <div class="feature-card">
-                    <h3>🚀 Zero Installation</h3>
-                    <p>Play instantly on any browser without downloads or client installations.</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="credits" class="tab-content">
-            <div class="credits-grid">
-                <div class="credits-group">
-                    <h3>Moon Engine Team</h3>
-                    <ul class="credits-list">
-                        <li><strong>Brenninho123</strong> <span>Owner / Programmer</span></li>
-                        <li><strong>Cookie</strong> <span>Programmer</span></li>
-                        <li><strong>StefanDX</strong> <span>Artist / PlayTester</span></li>
-                        <li><strong>Sunndy</strong> <span>Artist / PlayTester</span></li>
-                        <li><strong>Cosmic</strong> <span>Musician / PlayTester</span></li>
-                        <li><strong>Bruno</strong> <span>PlayTester</span></li>
-                    </ul>
-                </div>
-
-                <div class="credits-group">
-                    <h3>Friday Night Funkin'</h3>
-                    <p class="note">
-                        Full credits available in-game or via <a href="https://github.com/FunkinCrew/funkin.assets/blob/main/exclude/data/credits.json" target="_blank">credits.json</a>.
-                    </p>
-                    <h4>Programming</h4>
-                    <ul class="credits-list">
-                        <li><a href="https://twitter.com/ninja_muffin99" target="_blank">ninjamuffin99</a> <span>Lead Programmer</span></li>
-                        <li><a href="https://twitter.com/EliteMasterEric" target="_blank">EliteMasterEric</a> <span>Programmer</span></li>
-                    </ul>
-                </div>
-            </div>
+            <p style="color: var(--text-muted); line-height: 1.6;">Supports WebGL Acceleration, PWA offline caching, dynamic Lua/Haxe stages, and integrated Discord authorization.</p>
         </div>
 
         <div class="btn-container">
             <button id="installBtn" class="btn btn-install">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                </svg>
+                <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                 Install App
             </button>
             <a href="https://github.com/Brenninho123/Funkin-Moon" target="_blank" class="btn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-                View Source Code
+                <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                GitHub
             </a>
         </div>
 
-        <footer>
-            MoonEngine Web Edition &copy; Brenninho123
-        </footer>
+        <footer>MoonEngine Web Edition &copy; Brenninho123</footer>
     </div>
 
     <!-- Engine Core Scripts -->
@@ -975,14 +720,16 @@
             }
         });
 
-        function switchTab(tabId) {
+        function switchTab(e, tabId) {
             playMenuScrollSound();
 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            if (e && e.currentTarget) {
+                e.currentTarget.classList.add('active');
+            }
 
             if (tabId === 'game' && window.moonEngine) {
                 window.moonEngine.resizeCanvas();
@@ -1015,7 +762,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             stars = [];
-            for (let i = 0; i < 150; i++) {
+            for (let i = 0; i < 100; i++) {
                 stars.push({
                     x: Math.random() * canvas.width,
                     y: Math.random() * canvas.height,
@@ -1042,6 +789,11 @@
             });
             requestAnimationFrame(drawStars);
         }
+
+        const gameCanvas = document.getElementById('gameCanvas');
+        gameCanvas.addEventListener('touchstart', () => {
+            playMenuScrollSound();
+        }, { passive: true });
 
         window.addEventListener('resize', initCanvas);
         window.addEventListener('DOMContentLoaded', () => {
