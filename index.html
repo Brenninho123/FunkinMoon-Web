@@ -167,6 +167,23 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .game-viewport {
+            width: 100%;
+            height: 480px;
+            background: #000000;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
         .description {
             font-size: 1.05rem;
             line-height: 1.7;
@@ -344,6 +361,7 @@
             .stats-grid { grid-template-columns: 1fr; }
             .container { padding: 30px 20px; }
             h1 { font-size: 2.2rem; }
+            .game-viewport { height: 320px; }
         }
     </style>
 </head>
@@ -360,12 +378,19 @@
         <p class="subtitle">Next-Gen Rhythm Gaming Engine</p>
 
         <nav class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn active" onclick="switchTab('game')">Play Engine</button>
+            <button class="tab-btn" onclick="switchTab('overview')">Overview</button>
             <button class="tab-btn" onclick="switchTab('features')">Features</button>
             <button class="tab-btn" onclick="switchTab('credits')">Credits</button>
         </nav>
 
-        <div id="overview" class="tab-content active">
+        <div id="game" class="tab-content active">
+            <div class="game-viewport">
+                <canvas id="gameCanvas"></canvas>
+            </div>
+        </div>
+
+        <div id="overview" class="tab-content">
             <div class="description">
                 MoonEngine Web is a high-performance rhythm game framework engineered to execute custom charts, complex character animations, and Lua/Haxe stage events directly inside web browsers.
             </div>
@@ -445,6 +470,9 @@
         </footer>
     </div>
 
+    <!-- Main Engine Entry Point -->
+    <script src="source/Main.js"></script>
+
     <script>
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -452,6 +480,10 @@
             
             document.getElementById(tabId).classList.add('active');
             event.currentTarget.classList.add('active');
+
+            if (tabId === 'game' && window.moonEngine) {
+                window.moonEngine.resizeCanvas();
+            }
         }
 
         const canvas = document.getElementById('starfield');
