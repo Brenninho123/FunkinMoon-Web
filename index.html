@@ -267,6 +267,21 @@
             background-position: 0px -351px;
         }
 
+        /* Coordenadas de Options baseadas no XML */
+        .options-btn {
+            width: 487px;
+            height: 111px;
+            background-image: url('assets/images/mainmenu/options.png');
+            background-position: 0px -488px;
+            background-repeat: no-repeat;
+        }
+
+        .options-btn.selected {
+            width: 606px;
+            height: 155px;
+            background-position: 0px -329px;
+        }
+
         .document-modal {
             display: none;
             text-align: left;
@@ -432,6 +447,64 @@
             cursor: pointer;
         }
 
+        /* Estrutura de Options */
+        .options-panel {
+            display: none;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 25px;
+            animation: fadeIn 0.3s ease;
+            text-align: left;
+        }
+
+        .options-panel.active {
+            display: block;
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
+        }
+
+        .option-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .option-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--cyan-accent);
+            min-width: 45px;
+            text-align: center;
+        }
+
+        .opt-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
         .btn-container {
             display: flex;
             justify-content: center;
@@ -478,7 +551,8 @@
 
         @media (max-width: 768px) {
             .story-mode-btn, .story-mode-btn.selected,
-            .freeplay-btn, .freeplay-btn.selected {
+            .freeplay-btn, .freeplay-btn.selected,
+            .options-btn, .options-btn.selected {
                 transform: scale(0.65);
             }
             .community-layout {
@@ -540,6 +614,7 @@
         <div class="main-menu-container">
             <div id="storyModeBtn" class="menu-item-btn story-mode-btn" onclick="selectOption('story')"></div>
             <div id="freeplayBtn" class="menu-item-btn freeplay-btn" onclick="selectOption('freeplay')"></div>
+            <div id="optionsBtn" class="menu-item-btn options-btn" onclick="selectOption('options')"></div>
         </div>
 
         <div id="storyDocument" class="document-modal">
@@ -564,6 +639,17 @@
                         <input type="text" id="chatInput" class="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter') sendChatMessage()">
                         <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="optionsPanel" class="options-panel">
+            <div class="option-row">
+                <span class="option-label">FPS Limit</span>
+                <div class="option-control">
+                    <button class="opt-btn" onclick="adjustFps(-30)">-</button>
+                    <span id="fpsValue" class="option-value">60</span>
+                    <button class="opt-btn" onclick="adjustFps(30)">+</button>
                 </div>
             </div>
         </div>
@@ -596,7 +682,7 @@
         const discordAuth = new DiscordLogin();
         let communitySystem = null;
         let selectedOption = null;
-        let clickCounts = { story: 0, freeplay: 0 };
+        let clickCounts = { story: 0, freeplay: 0, options: 0 };
 
         function playSound(soundName) {
             if (window.moonEngine && typeof window.moonEngine.playSound === 'function') {
@@ -619,8 +705,11 @@
         function selectOption(opt) {
             const storyBtn = document.getElementById('storyModeBtn');
             const freeplayBtn = document.getElementById('freeplayBtn');
+            const optionsBtn = document.getElementById('optionsBtn');
+
             const docModal = document.getElementById('storyDocument');
             const communityContainer = document.getElementById('communityContainer');
+            const optionsPanel = document.getElementById('optionsPanel');
 
             if (selectedOption !== opt) {
                 clickCounts[opt] = 1;
@@ -629,21 +718,38 @@
 
                 storyBtn.classList.toggle('selected', opt === 'story');
                 freeplayBtn.classList.toggle('selected', opt === 'freeplay');
+                optionsBtn.classList.toggle('selected', opt === 'options');
+
                 docModal.classList.remove('active');
                 communityContainer.classList.remove('active');
+                optionsPanel.classList.remove('active');
             } else {
                 clickCounts[opt]++;
                 if (clickCounts[opt] >= 2) {
                     triggerFlash();
                     playSound('confirmMenu');
 
-                    if (opt === 'story') {
-                        docModal.classList.add('active');
-                        communityContainer.classList.remove('active');
-                    } else if (opt === 'freeplay') {
-                        docModal.classList.remove('active');
-                        communityContainer.classList.add('active');
-                    }
+                    docModal.classList.toggle('active', opt === 'story');
+                    communityContainer.classList.toggle('active', opt === 'freeplay');
+                    optionsPanel.classList.toggle('active', opt === 'options');
+                }
+            }
+        }
+
+        function updateFpsUI() {
+            if (typeof Preferences !== 'undefined') {
+                document.getElementById('fpsValue').textContent = Preferences.get('fps');
+            }
+        }
+
+        function adjustFps(delta) {
+            playSound('scrollMenu');
+            if (typeof Preferences !== 'undefined') {
+                let current = Preferences.get('fps');
+                let next = current + delta;
+                if (next >= 30 && next <= 240) {
+                    Preferences.set('fps', next);
+                    updateFpsUI();
                 }
             }
         }
@@ -727,11 +833,15 @@
             const diffY = touchStartY - touchEndY;
 
             if (Math.abs(diffY) > 40) {
+                const optionsList = ['story', 'freeplay', 'options'];
+                let currentIndex = optionsList.indexOf(selectedOption);
+
                 if (diffY > 0) {
-                    selectOption('freeplay');
+                    currentIndex = (currentIndex + 1) % optionsList.length;
                 } else {
-                    selectOption('story');
+                    currentIndex = (currentIndex - 1 + optionsList.length) % optionsList.length;
                 }
+                selectOption(optionsList[currentIndex]);
             }
         }, { passive: true });
 
@@ -803,6 +913,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateDiscordUI();
             initCommunityUI();
+            updateFpsUI();
             selectOption('story');
         });
         initCanvas();
