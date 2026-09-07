@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
     './assets/images/iconMoon.png',
     './source/funkin/Preferences.js',
     './source/funkin/Paths.js',
+    './source/funkin/api/discord/DiscordLogin.js',
     './source/funkin/ui/options/OptionsState.js',
     './source/funkin/play/PlayState.js',
     './source/Main.js'
