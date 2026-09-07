@@ -1,141 +1,110 @@
 class PlayState {
     constructor(engine) {
         this.engine = engine;
-        this.songName = '';
-        this.bpm = 100;
-        this.scrollSpeed = 1.0;
-        
-        this.inst = null;
-        this.voices = null;
-        
-        this.songPosition = 0;
-        this.notes = [];
-        this.strumLines = [];
-
         this.score = 0;
         this.misses = 0;
-        this.accuracy = 100.0;
-        
-        this.isPaused = false;
-        this.isEnded = false;
+        this.accuracy = 100.00;
+        this.totalNotesHit = 0;
+        this.totalNotesPlayed = 0;
+
+        this.songName = 'Test Song';
+        this.songSpeed = 2.0;
+
+        this.strumCount = 4;
+        this.strumLineY = 80;
+        this.strumPositions = [100, 200, 300, 400];
+        this.notes = [];
+
+        this.keys = ['a', 's', 'w', 'd'];
+        this.keyDirections = ['left', 'down', 'up', 'right'];
     }
 
-    create(songData) {
-        if (!songData) return;
-
-        this.songName = songData.song || 'Test';
-        this.bpm = songData.bpm || 100;
-        this.scrollSpeed = songData.speed || 1.0;
-        this.notes = songData.notes || [];
-
-        this.initStrumLines();
-        this.loadAudio();
+    create() {
+        this.generateDummyNotes();
+        this.setupMobileControls();
     }
 
-    initStrumLines() {
-        this.strumLines = [
-            { id: 0, key: 'left', x: 100, y: 50 },
-            { id: 1, key: 'down', x: 210, y: 50 },
-            { id: 2, key: 'up', x: 320, y: 50 },
-            { id: 3, key: 'right', x: 430, y: 50 }
-        ];
-    }
-
-    loadAudio() {
-        if (typeof Paths === 'undefined') return;
-
-        const instPath = Paths.inst(this.songName);
-        const voicesPath = Paths.voices(this.songName);
-
-        this.inst = new Audio(instPath);
-        this.voices = new Audio(voicesPath);
-
-        this.inst.addEventListener('canplaythrough', () => {
-            this.startSong();
-        });
-    }
-
-    startSong() {
-        if (this.inst) {
-            this.inst.play();
-        }
-        if (this.voices) {
-            this.voices.play();
+    generateDummyNotes() {
+        this.notes = [];
+        for (let i = 0; i < 20; i++) {
+            this.notes.push({
+                lane: i % 4,
+                time: (i + 1) * 1.5,
+                hit: false,
+                missed: false,
+                y: 0
+            });
         }
     }
 
-    update(elapsed) {
-        if (this.isPaused || this.isEnded) return;
+    setupMobileControls() {
+        if (!this.engine || !this.engine.canvas) return;
 
-        if (this.inst) {
-            this.songPosition = this.inst.currentTime * 1000;
-        } else {
-            this.songPosition += elapsed * 1000;
-        }
-
-        this.updateNotes();
-    }
-
-    updateNotes() {
-        for (let i = 0; i < this.notes.length; i++) {
-            const note = this.notes[i];
-            if (!note.wasHit && this.songPosition >= note.strumTime - 1000) {
-                note.y = this.calculateNoteY(note.strumTime);
+        this.engine.canvas.addEventListener('touchstart', (e) => {
+            const rect = this.engine.canvas.getBoundingClientRect();
+            for (let i = 0; i < e.touches.length; i++) {
+                const touchX = e.touches[i].clientX - rect.left;
+                const lane = Math.floor((touchX / rect.width) * 4);
+                if (lane >= 0 && lane < 4) {
+                    this.onNotePress(lane);
+                }
             }
-        }
-    }
-
-    calculateNoteY(strumTime) {
-        const timeDiff = strumTime - this.songPosition;
-        return 50 + (timeDiff * 0.45 * this.scrollSpeed);
+        }, { passive: true });
     }
 
     handleInput(key, isPressed) {
-        if (!isPressed || this.isPaused) return;
+        if (!isPressed) return;
 
-        const keyMap = {
-            'a': 0, 'arrowleft': 0,
-            's': 1, 'arrowdown': 1,
-            'w': 2, 'arrowup': 2,
-            'd': 3, 'arrowright': 3
-        };
-
-        const noteData = keyMap[key];
-        if (noteData !== undefined) {
-            this.checkNoteHit(noteData);
+        const lane = this.keys.indexOf(key);
+        if (lane !== -1) {
+            this.onNotePress(lane);
         }
     }
 
-    checkNoteHit(noteData) {
-        const hitWindow = 135;
+    onNotePress(lane) {
+        const targetNote = this.notes.find(n => n.lane === lane && !n.hit && !n.missed && Math.abs(n.y - this.strumLineY) < 40);
 
-        for (let i = 0; i < this.notes.length; i++) {
-            const note = this.notes[i];
+        if (targetNote) {
+            targetNote.hit = true;
+            this.score += 350;
+            this.totalNotesHit++;
+            this.totalNotesPlayed++;
+            this.recalculateAccuracy();
+        } else {
+            this.misses++;
+            this.score = Math.max(0, this.score - 100);
+            this.totalNotesPlayed++;
+            this.recalculateAccuracy();
+        }
+    }
 
-            if (!note.wasHit && note.noteData === noteData) {
-                const diff = Math.abs(note.strumTime - this.songPosition);
+    recalculateAccuracy() {
+        if (this.totalNotesPlayed > 0) {
+            this.accuracy = ((this.totalNotesHit / this.totalNotesPlayed) * 100).toFixed(2);
+        }
+    }
 
-                if (diff <= hitWindow) {
-                    note.wasHit = true;
-                    this.score += 350;
-                    break;
+    update(dt) {
+        this.notes.forEach(note => {
+            if (!note.hit && !note.missed) {
+                note.time -= dt;
+                note.y = this.strumLineY + (note.time * 100 * this.songSpeed);
+
+                if (note.y < this.strumLineY - 50) {
+                    note.missed = true;
+                    this.misses++;
+                    this.totalNotesPlayed++;
+                    this.recalculateAccuracy();
                 }
             }
-        }
+        });
     }
 
     render(gl) {
     }
 
     destroy() {
-        if (this.inst) {
-            this.inst.pause();
-            this.inst = null;
-        }
-        if (this.voices) {
-            this.voices.pause();
-            this.voices = null;
-        }
+        this.notes = [];
     }
 }
 
