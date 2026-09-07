@@ -1,93 +1,67 @@
 class Paths {
-    static get SOUND_EXT() {
-        return 'ogg';
+    static currentLevel = null;
+    static cache = new Map();
+
+    static setCurrentLevel(name) {
+        Paths.currentLevel = name.toLowerCase();
     }
 
-    static get IMAGE_EXT() {
-        return 'png';
+    static getPath(file, type = 'IMAGE', library = null) {
+        if (library != null) {
+            return `assets/${library}/${file}`;
+        }
+
+        if (Paths.currentLevel != null) {
+            const levelPath = `assets/${Paths.currentLevel}/${file}`;
+            return levelPath;
+        }
+
+        return `assets/${file}`;
     }
 
-    static file(path) {
-        return `assets/${path}`;
+    static image(key, library = null) {
+        return Paths.getPath(`images/${key}.png`, 'IMAGE', library);
     }
 
-    static txt(key) {
-        return this.file(`data/${key}.txt`);
+    static xml(key, library = null) {
+        return Paths.getPath(`images/${key}.xml`, 'TEXT', library);
     }
 
-    static xml(key) {
-        return this.file(`images/${key}.xml`);
+    static json(key, library = null) {
+        return Paths.getPath(`data/${key}.json`, 'TEXT', library);
     }
 
-    static json(key) {
-        return this.file(`data/${key}.json`);
+    static sound(key, library = null) {
+        return Paths.getPath(`sounds/${key}.ogg`, 'SOUND', library);
     }
 
-    static shaderFragment(key) {
-        return this.file(`shaders/${key}.frag`);
-    }
-
-    static shaderVertex(key) {
-        return this.file(`shaders/${key}.vert`);
-    }
-
-    static lua(key) {
-        return this.file(`scripts/${key}.lua`);
-    }
-
-    static sound(key) {
-        return this.file(`sounds/${key}.${this.SOUND_EXT}`);
-    }
-
-    static soundRandom(key, min, max) {
-        const randomIndex = Math.floor(Math.random() * (max - min + 1)) + min;
-        return this.sound(`${key}${randomIndex}`);
-    }
-
-    static music(key) {
-        return this.file(`music/${key}.${this.SOUND_EXT}`);
-    }
-
-    static image(key) {
-        return this.file(`images/${key}.${this.IMAGE_EXT}`);
-    }
-
-    static font(key) {
-        return this.file(`fonts/${key}`);
-    }
-
-    static getSparrowAtlas(key) {
-        return {
-            image: this.image(key),
-            xml: this.xml(key)
-        };
-    }
-
-    static character(key) {
-        return {
-            image: this.image(`characters/${key}`),
-            xml: this.xml(`characters/${key}`)
-        };
-    }
-
-    static stage(key) {
-        return this.file(`stages/${key}`);
+    static music(key, library = null) {
+        return Paths.getPath(`music/${key}.ogg`, 'MUSIC', library);
     }
 
     static inst(song) {
-        const formattedSong = song.toLowerCase().replace(/\s+/g, '-');
-        return this.file(`songs/${formattedSong}/Inst.${this.SOUND_EXT}`);
+        return `assets/songs/${song.toLowerCase()}/Inst.ogg`;
     }
 
     static voices(song) {
-        const formattedSong = song.toLowerCase().replace(/\s+/g, '-');
-        return this.file(`songs/${formattedSong}/Voices.${this.SOUND_EXT}`);
+        return `assets/songs/${song.toLowerCase()}/Voices.ogg`;
     }
 
-    static chart(song, jsonName = null) {
-        const formattedSong = song.toLowerCase().replace(/\s+/g, '-');
-        const fileName = jsonName ? jsonName : `${formattedSong}-chart`;
-        return this.file(`data/songs/${formattedSong}/${fileName}.json`);
+    static chart(song, difficulty = 'normal') {
+        const suff = difficulty.toLowerCase() === 'normal' ? '' : `-${difficulty.toLowerCase()}`;
+        return `assets/songs/${song.toLowerCase()}/${song.toLowerCase()}${suff}.json`;
+    }
+
+    static mainMenu(key) {
+        return `assets/images/mainmenu/${key}.png`;
+    }
+
+    static font(key) {
+        return `assets/fonts/${key}.ttf`;
+    }
+
+    static clearCache() {
+        Paths.cache.clear();
     }
 }
 
