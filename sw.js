@@ -1,4 +1,4 @@
-const APP_VERSION = 'v8';
+const APP_VERSION = 'v9';
 const CORE_CACHE = `moon-core-${APP_VERSION}`;
 const MEDIA_CACHE = `moon-media-${APP_VERSION}`;
 const DYNAMIC_CACHE = `moon-dynamic-${APP_VERSION}`;
@@ -8,6 +8,7 @@ const CORE_ASSETS = [
     './',
     './index.html',
     './manifest.json',
+    './project.js',
     './assets/images/iconMoon.png',
     './assets/images/menuBG.png',
     './assets/images/mainmenu/storymode.png',
@@ -15,12 +16,17 @@ const CORE_ASSETS = [
     './assets/images/mainmenu/options.png',
     './assets/sounds/scrollMenu.ogg',
     './assets/sounds/confirmMenu.ogg',
+    './source/funkin/Version.js',
     './source/funkin/Preferences.js',
+    './source/funkin/save/Save.js',
     './source/funkin/Paths.js',
+    './source/funkin/data/Data.js',
     './source/funkin/online/Online.js',
     './source/funkin/api/discord/DiscordLogin.js',
+    './source/funkin/api/youtube/YoutubeChannels.js',
     './source/funkin/ui/community/CommunityMenu.js',
     './source/funkin/ui/options/OptionsState.js',
+    './source/funkin/ui/debug/FunkinDebugDisplay.js',
     './source/funkin/play/PlayState.js',
     './source/Main.js'
 ];
@@ -113,7 +119,7 @@ self.addEventListener('fetch', (event) => {
                 }
                 return res;
             }).catch(() => {
-                if (request.headers.get('accept').includes('text/html')) {
+                if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
                     return caches.match('./index.html');
                 }
             });
