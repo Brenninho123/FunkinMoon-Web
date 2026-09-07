@@ -1,11 +1,13 @@
-const CACHE_NAME = 'moon-engine-v3';
+const CACHE_NAME = 'moon-engine-v4';
 const STATIC_ASSETS = [
     './',
     './index.html',
     './manifest.json',
     './assets/images/iconMoon.png',
     './assets/images/menuBG.png',
+    './assets/images/mainmenu/storymode.png',
     './assets/sounds/scrollMenu.ogg',
+    './assets/sounds/confirmMenu.ogg',
     './source/funkin/Preferences.js',
     './source/funkin/Paths.js',
     './source/funkin/online/Online.js',
