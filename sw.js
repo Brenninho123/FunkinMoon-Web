@@ -1,12 +1,15 @@
-const CACHE_NAME = 'moon-engine-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'moon-engine-v2';
+const STATIC_ASSETS = [
     './',
     './index.html',
     './manifest.json',
     './assets/images/iconMoon.png',
+    './assets/sounds/scrollMenu.ogg',
     './source/funkin/Preferences.js',
     './source/funkin/Paths.js',
+    './source/funkin/online/Online.js',
     './source/funkin/api/discord/DiscordLogin.js',
+    './source/funkin/ui/community/CommunityMenu.js',
     './source/funkin/ui/options/OptionsState.js',
     './source/funkin/play/PlayState.js',
     './source/Main.js'
@@ -15,7 +18,7 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(ASSETS_TO_CACHE);
+            return cache.addAll(STATIC_ASSETS);
         }).then(() => self.skipWaiting())
     );
 });
@@ -35,9 +38,38 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then((response) => {
-            return response || fetch(event.request);
-        })
-    );
+    const requestUrl = new URL(event.request.url);
+
+    if (requestUrl.origin === self.location.origin) {
+        event.respondWith(
+            caches.match(event.request).then((cachedResponse) => {
+                if (cachedResponse) {
+                    fetch(event.request).then((networkResponse) => {
+                        if (networkResponse.status === 200) {
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(event.request, networkResponse);
+                            });
+                        }
+                    }).catch(() => {});
+                    return cachedResponse;
+                }
+
+                return fetch(event.request).then((networkResponse) => {
+                    if (networkResponse.status === 200) {
+                        const responseToCache = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return networkResponse;
+                });
+            })
+        );
+    } else {
+        event.respondWith(
+            fetch(event.request).catch(() => {
+                return caches.match(event.request);
+            })
+        );
+    }
 });
