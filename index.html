@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=0.85, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MoonEngine - Web Edition</title>
     <link rel="icon" type="image/png" href="assets/images/iconMoon.png">
     <link rel="manifest" href="manifest.json">
@@ -47,7 +47,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: clamp(10px, 3vw, 40px);
+            padding: clamp(8px, 2vw, 30px);
             overflow-x: hidden;
             position: relative;
             touch-action: manipulation;
@@ -94,8 +94,8 @@
             background: var(--card-bg);
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: clamp(16px, 4vw, 24px);
-            padding: clamp(20px, 4vw, 45px);
+            border-radius: clamp(14px, 3vw, 24px);
+            padding: clamp(16px, 3vw, 35px);
             box-shadow: 0 0 70px rgba(123, 44, 191, 0.3), 0 30px 60px rgba(0, 0, 0, 0.9);
             border: 1px solid var(--border-glow);
             text-align: center;
@@ -105,11 +105,11 @@
 
         .top-bar {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 15px;
+            right: 15px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             z-index: 10;
         }
 
@@ -117,26 +117,20 @@
             background: rgba(255, 255, 255, 0.08);
             color: var(--moon-glow);
             border: 1px solid var(--border-glow);
-            padding: 8px 14px;
-            font-size: 0.85rem;
+            padding: 6px 12px;
+            font-size: 0.8rem;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 8px;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             transition: all 0.2s ease;
         }
 
-        .server-btn:hover {
-            background: rgba(157, 78, 221, 0.25);
-            color: #ffffff;
-            transform: translateY(-1px);
-        }
-
-        .server-btn svg {
-            width: 16px;
-            height: 16px;
+        .server-btn svg, .discord-btn svg {
+            width: 14px;
+            height: 14px;
             fill: currentColor;
         }
 
@@ -144,42 +138,35 @@
             background: var(--discord-blue);
             color: #ffffff;
             border: none;
-            padding: 8px 14px;
-            font-size: 0.85rem;
+            padding: 6px 12px;
+            font-size: 0.8rem;
             font-weight: 600;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .discord-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
+            gap: 5px;
         }
 
         .user-profile {
             display: none;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(0, 0, 0, 0.5);
-            padding: 4px 12px;
-            border-radius: 30px;
+            padding: 4px 10px;
+            border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .user-avatar {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             object-fit: cover;
         }
 
         .user-name {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
         }
 
@@ -188,41 +175,41 @@
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            font-size: 0.9rem;
-            margin-left: 4px;
+            font-size: 0.85rem;
+            margin-left: 2px;
         }
 
         .header-logo-container {
             position: relative;
             display: inline-block;
-            margin-bottom: 10px;
-            margin-top: 10px;
+            margin-bottom: 8px;
+            margin-top: 5px;
         }
 
         .header-logo {
-            width: clamp(80px, 15vw, 120px);
-            height: clamp(80px, 15vw, 120px);
+            width: clamp(70px, 12vw, 110px);
+            height: clamp(70px, 12vw, 110px);
             object-fit: contain;
-            filter: drop-shadow(0 0 20px rgba(224, 170, 255, 0.5));
+            filter: drop-shadow(0 0 15px rgba(224, 170, 255, 0.5));
         }
 
         h1 {
-            font-size: clamp(2rem, 6vw, 3.2rem);
+            font-size: clamp(1.8rem, 5vw, 3rem);
             font-weight: 800;
             letter-spacing: -1px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             background: linear-gradient(135deg, #ffffff 20%, var(--moon-glow) 60%, var(--accent-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
-            font-size: clamp(0.8rem, 2.5vw, 1.1rem);
+            font-size: clamp(0.75rem, 2vw, 1rem);
             color: var(--cyan-accent);
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 700;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .main-menu-container {
@@ -230,13 +217,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 15px;
-            margin-bottom: 25px;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
         }
 
         .menu-item-btn {
             cursor: pointer;
             transition: transform 0.15s ease;
+            max-width: 100%;
         }
 
         .story-mode-btn {
@@ -267,7 +256,6 @@
             background-position: 0px -351px;
         }
 
-        /* Coordenadas de Options baseadas no XML */
         .options-btn {
             width: 487px;
             height: 111px;
@@ -287,9 +275,9 @@
             text-align: left;
             background: rgba(8, 12, 24, 0.92);
             border: 1px solid var(--border-glow);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 25px;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
             animation: fadeIn 0.3s ease;
         }
 
@@ -299,23 +287,23 @@
 
         .document-modal h2 {
             color: var(--moon-glow);
-            font-size: 1.4rem;
-            margin-bottom: 12px;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
             border-bottom: 1px solid var(--border-glow);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .document-modal p {
             color: var(--text-muted);
-            line-height: 1.6;
-            font-size: 0.95rem;
-            margin-bottom: 10px;
+            line-height: 1.5;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
         }
 
         .community-container {
             display: none;
             animation: fadeIn 0.3s ease;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .community-container.active {
@@ -324,40 +312,40 @@
 
         .community-layout {
             display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 15px;
-            height: clamp(380px, 50vh, 480px);
+            grid-template-columns: 220px 1fr;
+            gap: 12px;
+            height: clamp(320px, 45vh, 440px);
             text-align: left;
         }
 
         .community-sidebar {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 12px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .sidebar-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--moon-glow);
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 8px;
+            padding-bottom: 6px;
         }
 
         .create-btn {
             background: var(--accent-purple);
             color: #ffffff;
             border: none;
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
+            width: 24px;
+            height: 24px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 700;
         }
@@ -368,17 +356,16 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
         }
 
         .community-item {
-            padding: 10px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             background: rgba(255, 255, 255, 0.02);
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            transition: all 0.2s ease;
         }
 
         .community-item.active {
@@ -388,7 +375,7 @@
 
         .chat-container {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             flex-direction: column;
@@ -397,22 +384,22 @@
 
         .chat-messages {
             flex-grow: 1;
-            padding: 15px;
+            padding: 12px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .chat-message {
             display: flex;
             gap: 8px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .chat-avatar {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             background: var(--accent-purple);
             object-fit: cover;
@@ -420,41 +407,40 @@
 
         .chat-input-bar {
             display: flex;
-            padding: 10px;
+            padding: 8px;
             background: rgba(0, 0, 0, 0.4);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            gap: 8px;
+            gap: 6px;
         }
 
         .chat-input {
             flex-grow: 1;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 8px 12px;
+            border-radius: 6px;
+            padding: 6px 10px;
             color: #ffffff;
             outline: none;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .chat-send-btn {
             background: var(--accent-purple);
             color: #ffffff;
             border: none;
-            padding: 0 14px;
-            border-radius: 8px;
+            padding: 0 12px;
+            border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
         }
 
-        /* Estrutura de Options */
         .options-panel {
             display: none;
             background: rgba(0, 0, 0, 0.25);
-            padding: 20px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.04);
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             animation: fadeIn 0.3s ease;
             text-align: left;
         }
@@ -467,29 +453,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px;
+            padding: 10px;
             background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
+            border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 10px;
         }
 
         .option-label {
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             font-weight: 600;
         }
 
         .option-control {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .option-value {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--cyan-accent);
-            min-width: 45px;
+            min-width: 40px;
             text-align: center;
         }
 
@@ -497,10 +482,10 @@
             background: var(--accent-purple);
             color: #ffffff;
             border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            font-size: 1rem;
             font-weight: 700;
             cursor: pointer;
         }
@@ -508,23 +493,23 @@
         .btn-container {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            margin-top: 25px;
-            margin-bottom: 15px;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-light));
             color: #ffffff;
-            padding: 12px 24px;
-            font-size: 0.95rem;
+            padding: 10px 20px;
+            font-size: 0.88rem;
             font-weight: 700;
             text-decoration: none;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             border: none;
         }
@@ -536,42 +521,77 @@
         }
 
         .btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             fill: currentColor;
         }
 
         footer {
-            margin-top: 30px;
-            font-size: 0.8rem;
+            margin-top: 20px;
+            font-size: 0.75rem;
             color: var(--text-muted);
             border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 20px;
+            padding-top: 15px;
         }
 
+        /* ESCALONAMENTO E ZOOM MENOR PARA DISPOSITIVOS MOBILE */
         @media (max-width: 768px) {
-            .story-mode-btn, .story-mode-btn.selected,
-            .freeplay-btn, .freeplay-btn.selected,
-            .options-btn, .options-btn.selected {
-                transform: scale(0.65);
+            body {
+                padding: 6px;
             }
-            .community-layout {
-                grid-template-columns: 1fr;
-                height: auto;
+
+            .container {
+                padding: 15px 10px;
+                border-radius: 16px;
             }
-            .community-sidebar {
-                max-height: 150px;
-            }
-            .chat-container {
-                height: 300px;
-            }
+
             .top-bar {
                 position: relative;
                 top: 0;
                 right: 0;
                 justify-content: center;
-                margin-bottom: 10px;
-                flex-wrap: wrap;
+                margin-bottom: 12px;
+            }
+
+            /* Redução do zoom dos botões do menu para preencher toda a tela */
+            .story-mode-btn {
+                transform: scale(0.48);
+                margin: -32px 0;
+            }
+            .story-mode-btn.selected {
+                transform: scale(0.48);
+                margin: -32px 0;
+            }
+
+            .freeplay-btn {
+                transform: scale(0.48);
+                margin: -32px 0;
+            }
+            .freeplay-btn.selected {
+                transform: scale(0.48);
+                margin: -32px 0;
+            }
+
+            .options-btn {
+                transform: scale(0.48);
+                margin: -32px 0;
+            }
+            .options-btn.selected {
+                transform: scale(0.48);
+                margin: -32px 0;
+            }
+
+            .community-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            .community-sidebar {
+                max-height: 120px;
+            }
+
+            .chat-container {
+                height: 260px;
             }
         }
     </style>
