@@ -47,27 +47,17 @@ class CommunityMenu {
                 owner: 'System',
                 membersCount: 128,
                 messages: [
-                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Welcome to the MoonEngine General Community!', timestamp: Date.now() - 3600000 }
+                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Welcome to MoonEngine Community! Type /play pico to start a song.', timestamp: Date.now() - 3600000 }
                 ]
             },
             {
-                id: 'modding',
-                name: 'mod-showcase',
-                description: 'Share your custom charts, Lua scripts, and stages.',
+                id: 'challenges',
+                name: 'daily-challenges',
+                description: 'Compete for the highest scores on weekly tracks!',
                 owner: 'System',
-                membersCount: 84,
+                membersCount: 95,
                 messages: [
-                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Post your latest mod preview links here.', timestamp: Date.now() - 1800000 }
-                ]
-            },
-            {
-                id: 'support',
-                name: 'help-and-support',
-                description: 'Need help with WebGL, chart loading, or PWA setups?',
-                owner: 'System',
-                membersCount: 42,
-                messages: [
-                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Check out the documentation or ask your questions below.', timestamp: Date.now() - 900000 }
+                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Today challenge: Play Blammed on ERECT difficulty! Type /play blammed to launch Freeplay.', timestamp: Date.now() - 1800000 }
                 ]
             }
         ];
@@ -135,9 +125,9 @@ class CommunityMenu {
 
     deleteCommunity(index) {
         if (index < 0 || index >= this.communities.length) return false;
-        
+
         const comm = this.communities[index];
-        if (comm.owner === 'System') return false; // Prevent deleting core system rooms
+        if (comm.owner === 'System') return false;
 
         this.communities.splice(index, 1);
         this.saveCommunitiesData();
@@ -183,6 +173,12 @@ class CommunityMenu {
         const current = this.communities[this.selectedCommunityIndex];
 
         switch (command) {
+            case '/play':
+            case '/freeplay':
+                const songTarget = args[0] || 'tutorial';
+                this.launchFreeplayState(songTarget);
+                return true;
+
             case '/clear':
                 if (current) {
                     current.messages = [];
@@ -197,10 +193,14 @@ class CommunityMenu {
                         sender: 'MoonBot',
                         avatar: 'assets/images/iconMoon.png',
                         badge: 'BOT',
-                        text: 'Available commands: /clear, /members, /join <room_index>, /help',
+                        text: 'Commands: /play <song_id>, /share, /clear, /members, /help',
                         timestamp: Date.now()
                     });
                 }
+                return true;
+
+            case '/share':
+                this.shareHighScore();
                 return true;
 
             case '/members':
@@ -215,16 +215,49 @@ class CommunityMenu {
                 }
                 return true;
 
-            case '/join':
-                const targetIdx = parseInt(args[0], 10);
-                if (!isNaN(targetIdx) && this.selectCommunity(targetIdx)) {
-                    return true;
-                }
-                return false;
-
             default:
                 return false;
         }
+    }
+
+    launchFreeplayState(songId = 'tutorial') {
+        if (this.engine && typeof FreeplayState !== 'undefined') {
+            if (typeof Save !== 'undefined' && Save.setCustom) {
+                Save.setCustom('lastFreeplaySong', songId.toLowerCase());
+            }
+
+            const freeplay = new FreeplayState(this.engine, { character: 'bf' });
+            this.engine.switchState(freeplay);
+        }
+    }
+
+    shareHighScore() {
+        const current = this.communities[this.selectedCommunityIndex];
+        if (!current) return;
+
+        let lastSong = 'tutorial';
+        let lastDiff = 'HARD';
+
+        if (typeof Save !== 'undefined' && Save.getCustom) {
+            lastSong = Save.getCustom('lastFreeplaySong') || 'tutorial';
+            lastDiff = Save.getCustom('lastFreeplayDiff') || 'HARD';
+        }
+
+        const score = typeof Save !== 'undefined' ? Save.getSongScore(lastSong, lastDiff) : 0;
+        const accuracy = typeof Save !== 'undefined' ? Save.getSongAccuracy(lastSong, lastDiff) : 0;
+
+        const shareMessage = {
+            id: `msg_${Date.now()}`,
+            sender: this.userProfile.username,
+            avatar: this.userProfile.avatar,
+            badge: 'RECORD',
+            text: `🏆 High score on ${lastSong.toUpperCase()} (${lastDiff}): ${score} pts | Acc: ${(accuracy * 100).toFixed(2)}%`,
+            timestamp: Date.now()
+        };
+
+        current.messages.push(shareMessage);
+        this.chatMessages = current.messages;
+        this.saveCommunitiesData();
     }
 
     getCurrentCommunity() {
