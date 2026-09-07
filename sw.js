@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-engine-v5';
+const CACHE_NAME = 'moon-engine-v6';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
     './assets/images/menuBG.png',
     './assets/images/mainmenu/storymode.png',
     './assets/images/mainmenu/freeplay.png',
+    './assets/images/mainmenu/options.png',
     './assets/sounds/scrollMenu.ogg',
     './assets/sounds/confirmMenu.ogg',
     './source/funkin/Preferences.js',
