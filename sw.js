@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moon-engine-v4';
+const CACHE_NAME = 'moon-engine-v5';
 const STATIC_ASSETS = [
     './',
     './index.html',
@@ -6,6 +6,7 @@ const STATIC_ASSETS = [
     './assets/images/iconMoon.png',
     './assets/images/menuBG.png',
     './assets/images/mainmenu/storymode.png',
+    './assets/images/mainmenu/freeplay.png',
     './assets/sounds/scrollMenu.ogg',
     './assets/sounds/confirmMenu.ogg',
     './source/funkin/Preferences.js',
@@ -36,7 +37,7 @@ self.addEventListener('activate', (event) => {
                     }
                 })
             );
-        }).then(() => self.clients.claim())
+        }).then(() => self.skipWaiting())
     );
 });
 
