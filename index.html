@@ -70,6 +70,19 @@
             pointer-events: none;
         }
 
+        #flashOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+            transition: opacity 0.4s ease-out;
+        }
+
         .container {
             max-width: 1000px;
             width: 100%;
@@ -107,7 +120,6 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.2s ease;
         }
 
         .discord-btn svg {
@@ -185,7 +197,13 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 15px;
             margin-bottom: 25px;
+        }
+
+        .menu-item-btn {
+            cursor: pointer;
+            transition: transform 0.15 ease;
         }
 
         .story-mode-btn {
@@ -194,15 +212,56 @@
             background-image: url('assets/images/mainmenu/storymode.png');
             background-position: 0px -540px;
             background-repeat: no-repeat;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-            max-width: 100%;
         }
 
         .story-mode-btn.selected {
             width: 796px;
             height: 173px;
             background-position: 0px -363px;
+        }
+
+        .freeplay-btn {
+            width: 480px;
+            height: 122px;
+            background-image: url('assets/images/mainmenu/freeplay.png');
+            background-position: 0px -540px;
+            background-repeat: no-repeat;
+        }
+
+        .freeplay-btn.selected {
+            width: 620px;
+            height: 173px;
+            background-position: 0px -363px;
+        }
+
+        .document-modal {
+            display: none;
+            text-align: left;
+            background: rgba(8, 12, 24, 0.92);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .document-modal.active {
+            display: block;
+        }
+
+        .document-modal h2 {
+            color: var(--moon-glow);
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-glow);
+            padding-bottom: 8px;
+        }
+
+        .document-modal p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 10px;
         }
 
         .game-viewport {
@@ -273,10 +332,8 @@
         }
 
         @media (max-width: 768px) {
-            .story-mode-btn {
-                transform: scale(0.65);
-            }
-            .story-mode-btn.selected {
+            .story-mode-btn, .story-mode-btn.selected,
+            .freeplay-btn, .freeplay-btn.selected {
                 transform: scale(0.65);
             }
             .user-bar {
@@ -293,8 +350,9 @@
 
     <div id="bg-layer"></div>
     <canvas id="starfield"></canvas>
+    <div id="flashOverlay"></div>
 
-    <div class="container">
+    <div class="container" id="menuContainer">
         <div class="user-bar">
             <button id="discordLoginBtn" class="discord-btn" onclick="discordAuth.login()">
                 <svg viewBox="0 0 24 24">
@@ -317,7 +375,15 @@
         <p class="subtitle">Next-Gen Rhythm Gaming Engine</p>
 
         <div class="main-menu-container">
-            <div id="storyModeBtn" class="story-mode-btn" onclick="handleStoryModeClick()"></div>
+            <div id="storyModeBtn" class="menu-item-btn story-mode-btn" onclick="selectOption('story')"></div>
+            <div id="freeplayBtn" class="menu-item-btn freeplay-btn" onclick="selectOption('freeplay')"></div>
+        </div>
+
+        <div id="storyDocument" class="document-modal">
+            <h2>📜 Moon Engine Specification Document</h2>
+            <p><strong>Version:</strong> Web Edition v1.0.0</p>
+            <p><strong>Architecture:</strong> WebGL accelerated canvas with asynchronous chart parsing and event-driven Lua script handling.</p>
+            <p><strong>Status:</strong> Engine initialized. PWA caching active with offline mode support.</p>
         </div>
 
         <div id="gameViewport" class="game-viewport">
@@ -350,7 +416,8 @@
 
     <script>
         const discordAuth = new DiscordLogin();
-        let storyModeClicks = 0;
+        let selectedOption = null;
+        let clickCounts = { story: 0, freeplay: 0 };
 
         function playSound(soundName) {
             if (window.moonEngine && typeof window.moonEngine.playSound === 'function') {
@@ -362,21 +429,68 @@
             }
         }
 
-        function handleStoryModeClick() {
-            const btn = document.getElementById('storyModeBtn');
-            storyModeClicks++;
+        function triggerFlash() {
+            const overlay = document.getElementById('flashOverlay');
+            overlay.style.opacity = '1';
+            setTimeout(() => {
+                overlay.style.opacity = '0';
+            }, 50);
+        }
 
-            if (storyModeClicks === 1) {
-                btn.classList.add('selected');
+        function selectOption(opt) {
+            const storyBtn = document.getElementById('storyModeBtn');
+            const freeplayBtn = document.getElementById('freeplayBtn');
+            const docModal = document.getElementById('storyDocument');
+            const gameViewport = document.getElementById('gameViewport');
+
+            if (selectedOption !== opt) {
+                clickCounts[opt] = 1;
+                selectedOption = opt;
                 playSound('scrollMenu');
-            } else if (storyModeClicks >= 2) {
-                playSound('confirmMenu');
-                document.getElementById('gameViewport').classList.add('active');
-                if (window.moonEngine) {
-                    window.moonEngine.resizeCanvas();
+
+                storyBtn.classList.toggle('selected', opt === 'story');
+                freeplayBtn.classList.toggle('selected', opt === 'freeplay');
+                docModal.classList.remove('active');
+            } else {
+                clickCounts[opt]++;
+                if (clickCounts[opt] >= 2) {
+                    triggerFlash();
+                    playSound('confirmMenu');
+
+                    if (opt === 'story') {
+                        docModal.classList.add('active');
+                        gameViewport.classList.remove('active');
+                    } else if (opt === 'freeplay') {
+                        docModal.classList.remove('active');
+                        gameViewport.classList.add('active');
+                        if (window.moonEngine) {
+                            window.moonEngine.resizeCanvas();
+                        }
+                    }
                 }
             }
         }
+
+        // Mobile Touch & Swipe Support
+        let touchStartY = 0;
+        const menuContainer = document.getElementById('menuContainer');
+
+        menuContainer.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        menuContainer.addEventListener('touchend', (e) => {
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffY = touchStartY - touchEndY;
+
+            if (Math.abs(diffY) > 40) {
+                if (diffY > 0) {
+                    selectOption('freeplay');
+                } else {
+                    selectOption('story');
+                }
+            }
+        }, { passive: true });
 
         async function updateDiscordUI() {
             const user = await discordAuth.fetchUserData();
@@ -405,26 +519,6 @@
                 navigator.serviceWorker.register('sw.js');
             });
         }
-
-        let deferredPrompt;
-        const installBtn = document.getElementById('installBtn');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'inline-flex';
-        });
-
-        installBtn.addEventListener('click', () => {
-            playSound('scrollMenu');
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(() => {
-                    deferredPrompt = null;
-                    installBtn.style.display = 'none';
-                });
-            }
-        });
 
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
@@ -465,6 +559,7 @@
         window.addEventListener('resize', initCanvas);
         window.addEventListener('DOMContentLoaded', () => {
             updateDiscordUI();
+            selectOption('story');
         });
         initCanvas();
         drawStars();
