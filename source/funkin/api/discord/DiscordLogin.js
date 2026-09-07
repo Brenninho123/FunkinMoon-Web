@@ -1,6 +1,6 @@
 class DiscordLogin {
     static CLIENT_ID = '1540653184530251847';
-    static REDIRECT_URI = window.location.origin + window.location.pathname;
+    static REDIRECT_URI = 'https://brenninho123.github.io/FunkinMoon-Web/';
     static SCOPES = ['identify'];
 
     constructor() {
@@ -23,7 +23,7 @@ class DiscordLogin {
     }
 
     login() {
-        const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${DiscordLogin.CLIENT_ID}&redirect_uri=${encodeURIComponent(DiscordLogin.REDIRECT_URI)}&response_type=token&scope=${encodeURIComponent(DiscordLogin.SCOPES.join(' '))}`;
+        const authUrl = `https://discord.com/oauth2/authorize?client_id=${DiscordLogin.CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(DiscordLogin.REDIRECT_URI)}&scope=${encodeURIComponent(DiscordLogin.SCOPES.join(' '))}`;
         window.location.href = authUrl;
     }
 
