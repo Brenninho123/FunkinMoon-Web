@@ -1,0 +1,24 @@
+{
+  "name": "MoonEngine Web Edition",
+  "short_name": "MoonEngine",
+  "description": "Next-Gen Rhythm Gaming Engine for Browsers",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#03050a",
+  "theme_color": "#7b2cbf",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "assets/images/iconMoon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/images/iconMoon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
