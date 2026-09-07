@@ -3,23 +3,24 @@ class MoonEngine {
         this.canvas = document.getElementById(canvasId);
         this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
         
-        this.lastTime = 0;
+        this.lastTime = performance.now();
         this.fps = 0;
         this.frameCount = 0;
         this.fpsTimer = 0;
+        this.isRunning = false;
 
         this.assets = {
-            images: {},
-            audio: {},
-            json: {}
+            images: new Map(),
+            audio: new Map(),
+            json: new Map()
         };
 
+        this.keysPressed = new Set();
         this.init();
     }
 
     init() {
         if (!this.gl) {
-            console.error('WebGL is not supported in this browser environment.');
             return;
         }
 
@@ -32,34 +33,40 @@ class MoonEngine {
 
         this.setupInputs();
         this.loadInitialAssets().then(() => {
+            this.isRunning = true;
             this.startLoop();
         });
     }
 
     resizeCanvas() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-        
-        this.canvas.width = width;
-        this.canvas.height = height;
-        
-        if (this.gl) {
-            this.gl.viewport(0, 0, width, height);
+        const displayWidth = this.canvas.clientWidth || window.innerWidth;
+        const displayHeight = this.canvas.clientHeight || window.innerHeight;
+
+        if (this.canvas.width !== displayWidth || this.canvas.height !== displayHeight) {
+            this.canvas.width = displayWidth;
+            this.canvas.height = displayHeight;
+            if (this.gl) {
+                this.gl.viewport(0, 0, displayWidth, displayHeight);
+            }
         }
     }
 
     setupInputs() {
         window.addEventListener('keydown', (e) => {
-            this.handleInput(e.key, true);
+            if (!e.repeat) {
+                this.keysPressed.add(e.key.toLowerCase());
+                this.handleInput(e.key.toLowerCase(), true);
+            }
         });
 
         window.addEventListener('keyup', (e) => {
-            this.handleInput(e.key, false);
+            this.keysPressed.delete(e.key.toLowerCase());
+            this.handleInput(e.key.toLowerCase(), false);
         });
     }
 
     handleInput(key, isPressed) {
-        switch (key.toLowerCase()) {
+        switch (key) {
             case 'a':
             case 'arrowleft':
                 break;
@@ -76,7 +83,7 @@ class MoonEngine {
     }
 
     async loadInitialAssets() {
-        const iconPath = 'assets/images/iconMoon.png';
+        const iconPath = typeof Paths !== 'undefined' ? Paths.image('iconMoon') : 'assets/images/iconMoon.png';
         await this.loadImage('iconMoon', iconPath).catch(() => {});
     }
 
@@ -84,7 +91,7 @@ class MoonEngine {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.onload = () => {
-                this.assets.images[key] = img;
+                this.assets.images.set(key, img);
                 resolve(img);
             };
             img.onerror = (err) => reject(err);
@@ -93,11 +100,14 @@ class MoonEngine {
     }
 
     startLoop() {
+        this.lastTime = performance.now();
         requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
     }
 
     gameLoop(timestamp) {
-        const deltaTime = (timestamp - this.lastTime) / 1000;
+        if (!this.isRunning) return;
+
+        const deltaTime = Math.min((timestamp - this.lastTime) / 1000, 0.1);
         this.lastTime = timestamp;
 
         this.calculateFPS(deltaTime);
