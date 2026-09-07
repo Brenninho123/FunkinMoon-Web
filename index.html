@@ -128,6 +128,7 @@
             padding: 6px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
         }
 
         .tab-btn {
@@ -182,6 +183,62 @@
             width: 100%;
             height: 100%;
             display: block;
+        }
+
+        .options-container {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 12px;
+        }
+
+        .option-label {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .option-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .option-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--cyan-accent);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .opt-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .opt-btn:hover {
+            background: var(--accent-light);
+            transform: scale(1.05);
         }
 
         .description {
@@ -379,6 +436,7 @@
 
         <nav class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('game')">Play Engine</button>
+            <button class="tab-btn" onclick="switchTab('options')">Options</button>
             <button class="tab-btn" onclick="switchTab('overview')">Overview</button>
             <button class="tab-btn" onclick="switchTab('features')">Features</button>
             <button class="tab-btn" onclick="switchTab('credits')">Credits</button>
@@ -387,6 +445,19 @@
         <div id="game" class="tab-content active">
             <div class="game-viewport">
                 <canvas id="gameCanvas"></canvas>
+            </div>
+        </div>
+
+        <div id="options" class="tab-content">
+            <div class="options-container">
+                <div class="option-row">
+                    <span class="option-label">FPS Limit</span>
+                    <div class="option-control">
+                        <button class="opt-btn" onclick="adjustFps(-30)">-</button>
+                        <span id="fpsValue" class="option-value">60</span>
+                        <button class="opt-btn" onclick="adjustFps(30)">+</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -471,7 +542,9 @@
     </div>
 
     <!-- Engine Core Scripts -->
+    <script src="source/funkin/Preferences.js"></script>
     <script src="source/funkin/Paths.js"></script>
+    <script src="source/funkin/ui/options/OptionsState.js"></script>
     <script src="source/funkin/play/PlayState.js"></script>
     <script src="source/Main.js"></script>
 
@@ -485,6 +558,23 @@
 
             if (tabId === 'game' && window.moonEngine) {
                 window.moonEngine.resizeCanvas();
+            }
+        }
+
+        function updateFpsUI() {
+            if (typeof Preferences !== 'undefined') {
+                document.getElementById('fpsValue').textContent = Preferences.get('fps');
+            }
+        }
+
+        function adjustFps(delta) {
+            if (typeof Preferences !== 'undefined') {
+                let current = Preferences.get('fps');
+                let next = current + delta;
+                if (next >= 30 && next <= 240) {
+                    Preferences.set('fps', next);
+                    updateFpsUI();
+                }
             }
         }
 
@@ -525,6 +615,7 @@
         }
 
         window.addEventListener('resize', initCanvas);
+        window.addEventListener('DOMContentLoaded', updateFpsUI);
         initCanvas();
         drawStars();
     </script>
