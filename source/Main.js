@@ -2,12 +2,15 @@ class MoonEngine {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
-        
+
         this.lastTime = performance.now();
+        this.accumulator = 0;
         this.fps = 0;
         this.frameCount = 0;
         this.fpsTimer = 0;
         this.isRunning = false;
+
+        this.currentState = null;
 
         this.assets = {
             images: new Map(),
@@ -24,6 +27,10 @@ class MoonEngine {
             return;
         }
 
+        if (typeof Preferences !== 'undefined') {
+            Preferences.init();
+        }
+
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
 
@@ -32,10 +39,26 @@ class MoonEngine {
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         this.setupInputs();
+        
         this.loadInitialAssets().then(() => {
             this.isRunning = true;
+            if (typeof PlayState !== 'undefined') {
+                this.switchState(new PlayState(this));
+            }
             this.startLoop();
         });
+    }
+
+    switchState(newState) {
+        if (this.currentState && typeof this.currentState.destroy === 'function') {
+            this.currentState.destroy();
+        }
+
+        this.currentState = newState;
+
+        if (this.currentState && typeof this.currentState.create === 'function') {
+            this.currentState.create();
+        }
     }
 
     resizeCanvas() {
@@ -53,32 +76,23 @@ class MoonEngine {
 
     setupInputs() {
         window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
             if (!e.repeat) {
-                this.keysPressed.add(e.key.toLowerCase());
-                this.handleInput(e.key.toLowerCase(), true);
+                this.keysPressed.add(key);
+                this.handleInput(key, true);
             }
         });
 
         window.addEventListener('keyup', (e) => {
-            this.keysPressed.delete(e.key.toLowerCase());
-            this.handleInput(e.key.toLowerCase(), false);
+            const key = e.key.toLowerCase();
+            this.keysPressed.delete(key);
+            this.handleInput(key, false);
         });
     }
 
     handleInput(key, isPressed) {
-        switch (key) {
-            case 'a':
-            case 'arrowleft':
-                break;
-            case 's':
-            case 'arrowdown':
-                break;
-            case 'w':
-            case 'arrowup':
-                break;
-            case 'd':
-            case 'arrowright':
-                break;
+        if (this.currentState && typeof this.currentState.handleInput === 'function') {
+            this.currentState.handleInput(key, isPressed);
         }
     }
 
@@ -107,12 +121,19 @@ class MoonEngine {
     gameLoop(timestamp) {
         if (!this.isRunning) return;
 
-        const deltaTime = Math.min((timestamp - this.lastTime) / 1000, 0.1);
-        this.lastTime = timestamp;
+        const targetFps = typeof Preferences !== 'undefined' ? Preferences.get('fps') : 60;
+        const frameInterval = 1000 / targetFps;
 
-        this.calculateFPS(deltaTime);
-        this.update(deltaTime);
-        this.render();
+        const elapsed = timestamp - this.lastTime;
+
+        if (elapsed >= frameInterval) {
+            const deltaTime = Math.min(elapsed / 1000, 0.1);
+            this.lastTime = timestamp - (elapsed % frameInterval);
+
+            this.calculateFPS(deltaTime);
+            this.update(deltaTime);
+            this.render();
+        }
 
         requestAnimationFrame((t) => this.gameLoop(t));
     }
@@ -129,10 +150,17 @@ class MoonEngine {
     }
 
     update(dt) {
+        if (this.currentState && typeof this.currentState.update === 'function') {
+            this.currentState.update(dt);
+        }
     }
 
     render() {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
+        if (this.currentState && typeof this.currentState.render === 'function') {
+            this.currentState.render(this.gl);
+        }
     }
 }
 
