@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MoonEngine - Web</title>
+    <title>MoonEngine - Web Edition</title>
     <link rel="icon" type="image/png" href="assets/images/iconMoon.png">
     <style>
         :root {
-            --bg-dark: #05070f;
-            --card-bg: rgba(18, 22, 41, 0.75);
+            --bg-dark: #03050a;
+            --card-bg: rgba(13, 17, 33, 0.7);
             --border-glow: rgba(157, 78, 221, 0.25);
             --moon-glow: #e0aaff;
             --accent-purple: #7b2cbf;
             --accent-light: #9d4edd;
             --cyan-accent: #00f5d4;
             --text-main: #f8f9fa;
-            --text-muted: #a0a8c7;
+            --text-muted: #9499c0;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
@@ -37,46 +37,25 @@
             position: relative;
         }
 
-        .space-bg {
+        #starfield {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: radial-gradient(circle at 50% 20%, #171030 0%, var(--bg-dark) 70%);
-        }
-
-        .stars {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-                        radial-gradient(1px 1px at 40px 70px, #e0aaff, rgba(0,0,0,0)),
-                        radial-gradient(2px 2px at 150px 160px, #ffffff, rgba(0,0,0,0)),
-                        radial-gradient(1.5px 1.5px at 280px 120px, #00f5d4, rgba(0,0,0,0));
-            background-repeat: repeat;
-            background-size: 300px 300px;
-            opacity: 0.4;
-            animation: starry 100s linear infinite;
-        }
-
-        @keyframes starry {
-            from { transform: translateY(0); }
-            to { transform: translateY(-300px); }
+            pointer-events: none;
         }
 
         .container {
-            max-width: 850px;
+            max-width: 900px;
             width: 100%;
             background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 24px;
             padding: 50px 40px;
-            box-shadow: 0 0 50px rgba(123, 44, 191, 0.15), 0 20px 40px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 60px rgba(123, 44, 191, 0.2), 0 30px 60px rgba(0, 0, 0, 0.9);
             border: 1px solid var(--border-glow);
             text-align: center;
             position: relative;
@@ -86,7 +65,7 @@
         .header-logo-container {
             position: relative;
             display: inline-block;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .header-logo-container::before {
@@ -95,70 +74,141 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 130px;
-            height: 130px;
+            width: 140px;
+            height: 140px;
             background: radial-gradient(circle, var(--accent-light) 0%, transparent 70%);
             opacity: 0.5;
-            filter: blur(20px);
+            filter: blur(25px);
             z-index: -1;
             animation: pulseGlow 4s ease-in-out infinite alternate;
         }
 
         @keyframes pulseGlow {
-            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.4; }
-            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+            0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.25); opacity: 0.7; }
         }
 
         .header-logo {
-            width: 120px;
-            height: 120px;
+            width: 130px;
+            height: 130px;
             object-fit: contain;
-            filter: drop-shadow(0 0 15px rgba(224, 170, 255, 0.4));
+            filter: drop-shadow(0 0 20px rgba(224, 170, 255, 0.5));
             transition: transform 0.4s ease;
         }
 
         .header-logo:hover {
-            transform: scale(1.05) rotate(3deg);
+            transform: scale(1.08) rotate(4deg);
         }
 
         h1 {
-            font-size: 3rem;
+            font-size: 3.2rem;
             font-weight: 800;
-            letter-spacing: -0.5px;
+            letter-spacing: -1px;
             margin-bottom: 8px;
-            background: linear-gradient(135deg, #ffffff 30%, var(--moon-glow) 70%, var(--accent-light) 100%);
+            background: linear-gradient(135deg, #ffffff 20%, var(--moon-glow) 60%, var(--accent-light) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .subtitle {
-            font-size: 1.15rem;
+            font-size: 1.1rem;
             color: var(--cyan-accent);
             text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 600;
+            letter-spacing: 3px;
+            font-weight: 700;
             margin-bottom: 30px;
-            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 35px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 24px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .tab-btn.active {
+            background: var(--accent-purple);
+            box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
+        }
+
+        .tab-content {
+            display: none;
+            text-align: left;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .description {
             font-size: 1.05rem;
             line-height: 1.7;
             color: var(--text-muted);
-            margin-bottom: 40px;
-            text-align: left;
             background: rgba(255, 255, 255, 0.02);
-            padding: 20px 25px;
-            border-radius: 12px;
-            border-left: 3px solid var(--accent-purple);
+            padding: 24px;
+            border-radius: 16px;
+            border-left: 4px solid var(--accent-purple);
+            margin-bottom: 30px;
         }
 
-        .features {
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-card .number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--cyan-accent);
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 20px;
-            margin-bottom: 40px;
-            text-align: left;
         }
 
         .feature-card {
@@ -180,9 +230,6 @@
             font-size: 1.15rem;
             color: var(--moon-glow);
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
         .feature-card p {
@@ -194,9 +241,8 @@
         .btn-container {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 45px;
-            flex-wrap: wrap;
+            margin-top: 35px;
+            margin-bottom: 20px;
         }
 
         .btn {
@@ -205,20 +251,18 @@
             gap: 12px;
             background: linear-gradient(135deg, var(--accent-purple), var(--accent-light));
             color: #ffffff;
-            padding: 16px 32px;
-            font-size: 1rem;
-            font-weight: 600;
+            padding: 16px 36px;
+            font-size: 1.05rem;
+            font-weight: 700;
             text-decoration: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(123, 44, 191, 0.4);
+            border-radius: 14px;
+            box-shadow: 0 4px 25px rgba(123, 44, 191, 0.5);
             transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(157, 78, 221, 0.6);
+            box-shadow: 0 8px 35px rgba(157, 78, 221, 0.7);
         }
 
         .btn svg {
@@ -227,37 +271,23 @@
             fill: currentColor;
         }
 
-        .credits-section {
-            border-top: 1px solid var(--border-glow);
-            padding-top: 35px;
-            text-align: left;
-        }
-
-        .credits-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            color: var(--moon-glow);
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
         .credits-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
         }
 
         .credits-group {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+            background: rgba(0, 0, 0, 0.25);
+            padding: 22px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
         .credits-group h3 {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             margin-bottom: 15px;
-            color: var(--text-main);
+            color: var(--moon-glow);
             border-bottom: 1px solid var(--border-glow);
             padding-bottom: 8px;
         }
@@ -276,7 +306,6 @@
             font-size: 0.95rem;
             color: var(--text-muted);
             margin-bottom: 10px;
-            line-height: 1.4;
             display: flex;
             justify-content: space-between;
         }
@@ -288,7 +317,6 @@
         .credits-list a {
             color: var(--moon-glow);
             text-decoration: none;
-            transition: color 0.2s ease;
         }
 
         .credits-list a:hover {
@@ -311,13 +339,17 @@
             padding-top: 25px;
             text-align: center;
         }
+
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .container { padding: 30px 20px; }
+            h1 { font-size: 2.2rem; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="space-bg">
-        <div class="stars"></div>
-    </div>
+    <canvas id="starfield"></canvas>
 
     <div class="container">
         <div class="header-logo-container">
@@ -327,37 +359,51 @@
         <h1>MoonEngine - Web</h1>
         <p class="subtitle">Next-Gen Rhythm Gaming Engine</p>
 
-        <div class="description">
-            MoonEngine Web is an advanced, high-performance rhythm engine designed to bring smooth charting, custom stages, and complex game mechanics straight to the browser environment with WebGL acceleration and responsive input handling.
+        <nav class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab-btn" onclick="switchTab('features')">Features</button>
+            <button class="tab-btn" onclick="switchTab('credits')">Credits</button>
+        </nav>
+
+        <div id="overview" class="tab-content active">
+            <div class="description">
+                MoonEngine Web is a high-performance rhythm game framework engineered to execute custom charts, complex character animations, and Lua/Haxe stage events directly inside web browsers.
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number">60+ FPS</div>
+                    <div class="label">Smooth Performance</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">WebGL</div>
+                    <div class="label">Hardware Acceleration</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">Low Latency</div>
+                    <div class="label">Responsive Controls</div>
+                </div>
+            </div>
         </div>
 
-        <div class="features">
-            <div class="feature-card">
-                <h3><span>🌙</span> WebGL Render</h3>
-                <p>Hardware-accelerated performance yielding high frame rates and ultra-low latency inputs.</p>
-            </div>
-            <div class="feature-card">
-                <h3><span>⚙️</span> Custom Scripting</h3>
-                <p>Full support for dynamic stages, custom Lua/Haxe modules, and custom event systems.</p>
-            </div>
-            <div class="feature-card">
-                <h3><span>🚀</span> Zero Install</h3>
-                <p>Fully optimized for modern web browsers without requiring external clients or setups.</p>
+        <div id="features" class="tab-content">
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🌙 Optimized WebGL</h3>
+                    <p>Hardware-accelerated rendering tailored for seamless execution across desktop and mobile browsers.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚙️ Scripting System</h3>
+                    <p>Modular event callbacks and stage configuration via custom Lua and Haxe scripts.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🚀 Zero Installation</h3>
+                    <p>Play instantly on any browser without downloads or client installations.</p>
+                </div>
             </div>
         </div>
 
-        <div class="btn-container">
-            <a href="https://github.com/Brenninho123/Funkin-Moon" target="_blank" class="btn">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                </svg>
-                View Source Code
-            </a>
-        </div>
-
-        <section class="credits-section">
-            <h2>Project Credits</h2>
-
+        <div id="credits" class="tab-content">
             <div class="credits-grid">
                 <div class="credits-group">
                     <h3>Moon Engine Team</h3>
@@ -383,12 +429,70 @@
                     </ul>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <div class="btn-container">
+            <a href="https://github.com/Brenninho123/Funkin-Moon" target="_blank" class="btn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                </svg>
+                View Source Code
+            </a>
+        </div>
 
         <footer>
             MoonEngine Web Edition &copy; Brenninho123
         </footer>
     </div>
 
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        const canvas = document.getElementById('starfield');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for (let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.3 + 0.1
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(224, 170, 255, ${star.alpha})`;
+                ctx.fill();
+
+                star.y -= star.speed;
+                if (star.y < 0) {
+                    star.y = canvas.height;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        drawStars();
+    </script>
 </body>
 </html>
