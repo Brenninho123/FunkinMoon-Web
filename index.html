@@ -51,7 +51,7 @@
         }
 
         .container {
-            max-width: 950px;
+            max-width: 1000px;
             width: 100%;
             background: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -257,6 +257,145 @@
             width: 100%;
             height: 100%;
             display: block;
+        }
+
+        /* Community Layout */
+        .community-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 20px;
+            height: 480px;
+        }
+
+        .community-sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--moon-glow);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 10px;
+        }
+
+        .create-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .community-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .community-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .community-item.active, .community-item:hover {
+            background: rgba(157, 78, 221, 0.2);
+            color: var(--text-main);
+        }
+
+        .chat-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .chat-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+        }
+
+        .chat-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-sender {
+            font-weight: 700;
+            color: var(--cyan-accent);
+            font-size: 0.8rem;
+        }
+
+        .chat-text {
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        .chat-input-bar {
+            display: flex;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: #ffffff;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            padding: 0 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .options-container {
@@ -503,7 +642,8 @@
             text-align: center;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 700px) {
+            .community-layout { grid-template-columns: 1fr; height: auto; }
             .stats-grid { grid-template-columns: 1fr; }
             .container { padding: 30px 20px; }
             h1 { font-size: 2.2rem; }
@@ -540,6 +680,7 @@
 
         <nav class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('game')">Play Engine</button>
+            <button class="tab-btn" onclick="switchTab('community')">Community</button>
             <button class="tab-btn" onclick="switchTab('options')">Options</button>
             <button class="tab-btn" onclick="switchTab('overview')">Overview</button>
             <button class="tab-btn" onclick="switchTab('features')">Features</button>
@@ -549,6 +690,27 @@
         <div id="game" class="tab-content active">
             <div class="game-viewport">
                 <canvas id="gameCanvas"></canvas>
+            </div>
+        </div>
+
+        <div id="community" class="tab-content">
+            <div class="community-layout">
+                <div class="community-sidebar">
+                    <div class="sidebar-header">
+                        <span>Communities</span>
+                        <button class="create-btn" onclick="createNewCommunityPrompt()">+</button>
+                    </div>
+                    <ul id="communityList" class="community-list">
+                    </ul>
+                </div>
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages">
+                    </div>
+                    <div class="chat-input-bar">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                        <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -654,13 +816,16 @@
     <!-- Engine Core Scripts -->
     <script src="source/funkin/Preferences.js"></script>
     <script src="source/funkin/Paths.js"></script>
+    <script src="source/funkin/online/Online.js"></script>
     <script src="source/funkin/api/discord/DiscordLogin.js"></script>
+    <script src="source/funkin/ui/community/CommunityMenu.js"></script>
     <script src="source/funkin/ui/options/OptionsState.js"></script>
     <script src="source/funkin/play/PlayState.js"></script>
     <script src="source/Main.js"></script>
 
     <script>
         const discordAuth = new DiscordLogin();
+        let communitySystem = null;
 
         async function updateDiscordUI() {
             const user = await discordAuth.fetchUserData();
@@ -681,6 +846,70 @@
         function logoutDiscord() {
             discordAuth.logout();
             updateDiscordUI();
+        }
+
+        function initCommunityUI() {
+            if (typeof CommunityMenu !== 'undefined') {
+                communitySystem = new CommunityMenu(window.moonEngine);
+                communitySystem.create();
+                renderCommunitiesList();
+            }
+        }
+
+        function renderCommunitiesList() {
+            if (!communitySystem) return;
+            const listContainer = document.getElementById('communityList');
+            listContainer.innerHTML = '';
+
+            communitySystem.communities.forEach((comm, index) => {
+                const li = document.createElement('li');
+                li.className = `community-item ${index === communitySystem.selectedCommunityIndex ? 'active' : ''}`;
+                li.textContent = `# ${comm.name}`;
+                li.onclick = () => {
+                    communitySystem.joinCommunity(index);
+                    renderCommunitiesList();
+                    renderChatMessages();
+                };
+                listContainer.appendChild(li);
+            });
+        }
+
+        function createNewCommunityPrompt() {
+            const name = prompt('Enter community room name:');
+            if (name && communitySystem) {
+                communitySystem.createCommunity(name);
+                renderCommunitiesList();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            if (input.value && communitySystem) {
+                communitySystem.sendMessage(input.value);
+                input.value = '';
+                renderChatMessages();
+            }
+        }
+
+        function renderChatMessages() {
+            if (!communitySystem) return;
+            const chatBox = document.getElementById('chatMessages');
+            chatBox.innerHTML = '';
+
+            communitySystem.chatMessages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-message';
+                msgDiv.innerHTML = `
+                    <img class="chat-avatar" src="${msg.avatar || 'assets/images/iconMoon.png'}" alt="Avatar">
+                    <div class="chat-body">
+                        <span class="chat-sender">${msg.sender}</span>
+                        <span class="chat-text">${msg.text}</span>
+                    </div>
+                `;
+                chatBox.appendChild(msgDiv);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         if ('serviceWorker' in navigator) {
@@ -777,6 +1006,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             updateFpsUI();
             updateDiscordUI();
+            initCommunityUI();
         });
         initCanvas();
         drawStars();
