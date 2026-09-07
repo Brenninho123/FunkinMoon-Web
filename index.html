@@ -35,6 +35,11 @@
             -webkit-user-select: none;
         }
 
+        input, textarea {
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
@@ -203,7 +208,7 @@
 
         .menu-item-btn {
             cursor: pointer;
-            transition: transform 0.15 ease;
+            transition: transform 0.15s ease;
         }
 
         .story-mode-btn {
@@ -220,18 +225,19 @@
             background-position: 0px -363px;
         }
 
+        /* Coordenadas ajustadas conforme o XML */
         .freeplay-btn {
-            width: 480px;
+            width: 484px;
             height: 122px;
             background-image: url('assets/images/mainmenu/freeplay.png');
-            background-position: 0px -540px;
+            background-position: 0px -524px;
             background-repeat: no-repeat;
         }
 
         .freeplay-btn.selected {
-            width: 620px;
-            height: 173px;
-            background-position: 0px -363px;
+            width: 627px;
+            height: 169px;
+            background-position: 0px -351px;
         }
 
         .document-modal {
@@ -264,27 +270,140 @@
             margin-bottom: 10px;
         }
 
-        .game-viewport {
-            width: 100%;
-            height: clamp(300px, 50vh, 480px);
-            background: #000000;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            position: relative;
-            touch-action: none;
+        /* Estrutura da Comunidade */
+        .community-container {
             display: none;
+            animation: fadeIn 0.3s ease;
+            margin-bottom: 25px;
         }
 
-        .game-viewport.active {
+        .community-container.active {
             display: block;
         }
 
-        #gameCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
+        .community-layout {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 15px;
+            height: clamp(380px, 50vh, 480px);
+            text-align: left;
+        }
+
+        .community-sidebar {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--moon-glow);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+
+        .create-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+        }
+
+        .community-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .community-item {
+            padding: 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .community-item.active {
+            background: rgba(157, 78, 221, 0.25);
+            color: var(--text-main);
+        }
+
+        .chat-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .chat-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-purple);
+            object-fit: cover;
+        }
+
+        .chat-input-bar {
+            display: flex;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: #ffffff;
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .chat-send-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            padding: 0 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
         }
 
         .btn-container {
@@ -336,6 +455,16 @@
             .freeplay-btn, .freeplay-btn.selected {
                 transform: scale(0.65);
             }
+            .community-layout {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            .community-sidebar {
+                max-height: 150px;
+            }
+            .chat-container {
+                height: 300px;
+            }
             .user-bar {
                 position: relative;
                 top: 0;
@@ -379,6 +508,7 @@
             <div id="freeplayBtn" class="menu-item-btn freeplay-btn" onclick="selectOption('freeplay')"></div>
         </div>
 
+        <!-- Documento da Moon Engine -->
         <div id="storyDocument" class="document-modal">
             <h2>📜 Moon Engine Specification Document</h2>
             <p><strong>Version:</strong> Web Edition v1.0.0</p>
@@ -386,8 +516,24 @@
             <p><strong>Status:</strong> Engine initialized. PWA caching active with offline mode support.</p>
         </div>
 
-        <div id="gameViewport" class="game-viewport">
-            <canvas id="gameCanvas"></canvas>
+        <!-- Interface da Comunidade (Freeplay) -->
+        <div id="communityContainer" class="community-container">
+            <div class="community-layout">
+                <div class="community-sidebar">
+                    <div class="sidebar-header">
+                        <span>Communities</span>
+                        <button class="create-btn" onclick="createNewCommunityPrompt()">+</button>
+                    </div>
+                    <ul id="communityList" class="community-list"></ul>
+                </div>
+                <div class="chat-container">
+                    <div id="chatMessages" class="chat-messages"></div>
+                    <div class="chat-input-bar">
+                        <input type="text" id="chatInput" class="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+                        <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="btn-container">
@@ -416,6 +562,7 @@
 
     <script>
         const discordAuth = new DiscordLogin();
+        let communitySystem = null;
         let selectedOption = null;
         let clickCounts = { story: 0, freeplay: 0 };
 
@@ -441,7 +588,7 @@
             const storyBtn = document.getElementById('storyModeBtn');
             const freeplayBtn = document.getElementById('freeplayBtn');
             const docModal = document.getElementById('storyDocument');
-            const gameViewport = document.getElementById('gameViewport');
+            const communityContainer = document.getElementById('communityContainer');
 
             if (selectedOption !== opt) {
                 clickCounts[opt] = 1;
@@ -451,6 +598,7 @@
                 storyBtn.classList.toggle('selected', opt === 'story');
                 freeplayBtn.classList.toggle('selected', opt === 'freeplay');
                 docModal.classList.remove('active');
+                communityContainer.classList.remove('active');
             } else {
                 clickCounts[opt]++;
                 if (clickCounts[opt] >= 2) {
@@ -459,19 +607,83 @@
 
                     if (opt === 'story') {
                         docModal.classList.add('active');
-                        gameViewport.classList.remove('active');
+                        communityContainer.classList.remove('active');
                     } else if (opt === 'freeplay') {
                         docModal.classList.remove('active');
-                        gameViewport.classList.add('active');
-                        if (window.moonEngine) {
-                            window.moonEngine.resizeCanvas();
-                        }
+                        communityContainer.classList.add('active');
                     }
                 }
             }
         }
 
-        // Mobile Touch & Swipe Support
+        function initCommunityUI() {
+            if (typeof CommunityMenu !== 'undefined') {
+                communitySystem = new CommunityMenu(window.moonEngine);
+                communitySystem.create();
+                renderCommunitiesList();
+            }
+        }
+
+        function renderCommunitiesList() {
+            if (!communitySystem) return;
+            const listContainer = document.getElementById('communityList');
+            listContainer.innerHTML = '';
+
+            communitySystem.communities.forEach((comm, index) => {
+                const li = document.createElement('li');
+                li.className = `community-item ${index === communitySystem.selectedCommunityIndex ? 'active' : ''}`;
+                li.textContent = `# ${comm.name}`;
+                li.onclick = (e) => {
+                    e.stopPropagation();
+                    playSound('scrollMenu');
+                    communitySystem.joinCommunity(index);
+                    renderCommunitiesList();
+                    renderChatMessages();
+                };
+                listContainer.appendChild(li);
+            });
+        }
+
+        function createNewCommunityPrompt() {
+            playSound('scrollMenu');
+            const name = prompt('Enter community room name:');
+            if (name && communitySystem) {
+                communitySystem.createCommunity(name);
+                renderCommunitiesList();
+            }
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            if (input.value && communitySystem) {
+                communitySystem.sendMessage(input.value);
+                input.value = '';
+                renderChatMessages();
+            }
+        }
+
+        function renderChatMessages() {
+            if (!communitySystem) return;
+            const chatBox = document.getElementById('chatMessages');
+            chatBox.innerHTML = '';
+
+            communitySystem.chatMessages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-message';
+                msgDiv.innerHTML = `
+                    <img class="chat-avatar" src="${msg.avatar || 'assets/images/iconMoon.png'}" alt="Avatar">
+                    <div class="chat-body">
+                        <span class="chat-sender">${msg.sender}</span>
+                        <span class="chat-text">${msg.text}</span>
+                    </div>
+                `;
+                chatBox.appendChild(msgDiv);
+            });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Suporte Mobile Swipe
         let touchStartY = 0;
         const menuContainer = document.getElementById('menuContainer');
 
@@ -559,6 +771,7 @@
         window.addEventListener('resize', initCanvas);
         window.addEventListener('DOMContentLoaded', () => {
             updateDiscordUI();
+            initCommunityUI();
             selectOption('story');
         });
         initCanvas();
