@@ -1,6 +1,6 @@
 const projectConfig = {
     name: 'MoonEngine',
-    version: '1.0.0-web',
+    version: '1.2.0-web',
     author: 'Brenninho123',
     repository: 'https://github.com/Brenninho123/Funkin-Moon',
     discordServer: 'https://discord.gg/CEvNkkrgDX',
@@ -26,6 +26,7 @@ const projectConfig = {
         'source/funkin/ui/community/CommunityMenu.js',
         'source/funkin/ui/options/OptionsState.js',
         'source/funkin/ui/debug/FunkinDebugDisplay.js',
+        'source/funkin/ui/freeplay/FreeplayState.js',
         'source/funkin/play/PlayState.js',
         'source/Main.js'
     ],
