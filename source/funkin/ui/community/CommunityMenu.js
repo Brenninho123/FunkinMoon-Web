@@ -1,174 +1,239 @@
 class CommunityMenu {
     constructor(engine) {
         this.engine = engine;
-        this.discord = null;
-        this.online = null;
-
-        this.communities = [];
         this.selectedCommunityIndex = 0;
-        this.activeChannel = null;
-
+        this.communities = [];
         this.chatMessages = [];
-        this.activeUser = null;
-        this.isActive = false;
+        this.userProfile = {
+            username: 'Guest',
+            avatar: 'assets/images/iconMoon.png',
+            badge: 'Member'
+        };
+
+        this.storageKey = 'MoonEngine_CommunityData';
     }
 
     create() {
-        this.isActive = true;
-
-        if (typeof DiscordLogin !== 'undefined') {
-            this.discord = new DiscordLogin();
-            this.activeUser = {
-                name: this.discord.getUsername() || 'Guest',
-                avatar: this.discord.getAvatarUrl() || ''
-            };
+        this.loadUserProfile();
+        this.loadCommunitiesData();
+        if (this.communities.length === 0) {
+            this.setupDefaultCommunities();
         }
-
-        if (typeof OnlineManager !== 'undefined') {
-            this.online = new OnlineManager();
-            this.setupOnlineListeners();
-        }
-
-        this.loadDefaultCommunities();
+        this.selectCommunity(0);
     }
 
-    loadDefaultCommunities() {
-        this.communities = [
-            { id: 'global', name: 'Global Moon Lounge', description: 'General chat for MoonEngine players', members: 0 },
-            { id: 'modding', name: 'Modding & Scripts', description: 'Discuss Lua, Haxe, and custom stages', members: 0 },
-            { id: 'multiplayer', name: 'Lobby Finder', description: 'Find players for online rhythm battles', members: 0 }
-        ];
-    }
-
-    setupOnlineListeners() {
-        if (!this.online) return;
-
-        this.online.on('communityList', (list) => {
-            if (Array.isArray(list) && list.length > 0) {
-                this.communities = list;
+    loadUserProfile() {
+        if (typeof Save !== 'undefined' && Save.getCustom) {
+            const savedProfile = Save.getCustom('userProfile');
+            if (savedProfile) {
+                this.userProfile = Object.assign(this.userProfile, savedProfile);
             }
-        });
-
-        this.online.on('chatMessage', (msg) => {
-            this.receiveMessage(msg);
-        });
-
-        this.online.on('roomJoined', (data) => {
-            this.activeChannel = data.roomId;
-            this.chatMessages = data.history || [];
-        });
-    }
-
-    connectToServer(serverUrl) {
-        if (this.online) {
-            this.online.connect(serverUrl);
         }
     }
 
-    createCommunity(name, description = '') {
-        const newCommunity = {
-            id: name.toLowerCase().replace(/\s+/g, '-'),
-            name: name,
-            description: description,
-            members: 1
-        };
-
-        this.communities.push(newCommunity);
-
-        if (this.online && this.online.isConnected) {
-            this.online.send('createCommunity', newCommunity);
+    updateUserProfile(username, avatar, badge = 'Member') {
+        this.userProfile = { username, avatar, badge };
+        if (typeof Save !== 'undefined' && Save.setCustom) {
+            Save.setCustom('userProfile', this.userProfile);
         }
+    }
 
-        return newCommunity;
+    setupDefaultCommunities() {
+        this.communities = [
+            {
+                id: 'general',
+                name: 'general-chat',
+                description: 'General discussion about MoonEngine and FNF modding.',
+                owner: 'System',
+                membersCount: 128,
+                messages: [
+                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Welcome to the MoonEngine General Community!', timestamp: Date.now() - 3600000 }
+                ]
+            },
+            {
+                id: 'modding',
+                name: 'mod-showcase',
+                description: 'Share your custom charts, Lua scripts, and stages.',
+                owner: 'System',
+                membersCount: 84,
+                messages: [
+                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Post your latest mod preview links here.', timestamp: Date.now() - 1800000 }
+                ]
+            },
+            {
+                id: 'support',
+                name: 'help-and-support',
+                description: 'Need help with WebGL, chart loading, or PWA setups?',
+                owner: 'System',
+                membersCount: 42,
+                messages: [
+                    { sender: 'MoonBot', avatar: 'assets/images/iconMoon.png', badge: 'BOT', text: 'Check out the documentation or ask your questions below.', timestamp: Date.now() - 900000 }
+                ]
+            }
+        ];
+        this.saveCommunitiesData();
+    }
+
+    loadCommunitiesData() {
+        if (typeof Save !== 'undefined' && Save.getCustom) {
+            const stored = Save.getCustom('communityList');
+            if (stored && Array.isArray(stored)) {
+                this.communities = stored;
+            }
+        }
+    }
+
+    saveCommunitiesData() {
+        if (typeof Save !== 'undefined' && Save.setCustom) {
+            Save.setCustom('communityList', this.communities);
+        }
+    }
+
+    selectCommunity(index) {
+        if (index >= 0 && index < this.communities.length) {
+            this.selectedCommunityIndex = index;
+            const current = this.communities[this.selectedCommunityIndex];
+            this.chatMessages = current.messages || [];
+            return current;
+        }
+        return null;
     }
 
     joinCommunity(index) {
-        if (index < 0 || index >= this.communities.length) return;
+        return this.selectCommunity(index);
+    }
 
-        this.selectedCommunityIndex = index;
-        const target = this.communities[index];
+    createCommunity(name, description = '') {
+        const cleanName = name.toLowerCase().trim().replace(/\s+/g, '-');
+        if (!cleanName) return false;
 
-        if (this.online && this.online.isConnected) {
-            this.online.joinRoom(target.id);
-        } else {
-            this.activeChannel = target.id;
-            this.chatMessages = [];
+        const exists = this.communities.some(c => c.name === cleanName);
+        if (exists) return false;
+
+        const newCommunity = {
+            id: `comm_${Date.now()}`,
+            name: cleanName,
+            description: description || 'User created community.',
+            owner: this.userProfile.username,
+            membersCount: 1,
+            messages: [
+                {
+                    sender: 'MoonBot',
+                    avatar: 'assets/images/iconMoon.png',
+                    badge: 'BOT',
+                    text: `Room #${cleanName} created by ${this.userProfile.username}.`,
+                    timestamp: Date.now()
+                }
+            ]
+        };
+
+        this.communities.push(newCommunity);
+        this.saveCommunitiesData();
+        this.selectCommunity(this.communities.length - 1);
+        return true;
+    }
+
+    deleteCommunity(index) {
+        if (index < 0 || index >= this.communities.length) return false;
+        
+        const comm = this.communities[index];
+        if (comm.owner === 'System') return false; // Prevent deleting core system rooms
+
+        this.communities.splice(index, 1);
+        this.saveCommunitiesData();
+
+        if (this.selectedCommunityIndex >= this.communities.length) {
+            this.selectedCommunityIndex = Math.max(0, this.communities.length - 1);
         }
+        this.selectCommunity(this.selectedCommunityIndex);
+        return true;
     }
 
     sendMessage(text) {
-        if (!text || text.trim() === '') return;
+        if (!text || !text.trim()) return false;
+        const trimmed = text.trim();
 
-        const messageData = {
-            sender: this.activeUser ? this.activeUser.name : 'Guest',
-            avatar: this.activeUser ? this.activeUser.avatar : '',
-            channelId: this.activeChannel,
-            text: text.trim(),
+        if (trimmed.startsWith('/')) {
+            return this.handleCommand(trimmed);
+        }
+
+        const current = this.communities[this.selectedCommunityIndex];
+        if (!current) return false;
+
+        const messageObj = {
+            id: `msg_${Date.now()}`,
+            sender: this.userProfile.username,
+            avatar: this.userProfile.avatar,
+            badge: this.userProfile.badge,
+            text: trimmed,
             timestamp: Date.now()
         };
 
-        if (this.online && this.online.isConnected) {
-            this.online.send('sendMessage', messageData);
-        } else {
-            this.receiveMessage(messageData);
+        current.messages.push(messageObj);
+        this.chatMessages = current.messages;
+        this.saveCommunitiesData();
+        return true;
+    }
+
+    handleCommand(cmdString) {
+        const parts = cmdString.split(' ');
+        const command = parts[0].toLowerCase();
+        const args = parts.slice(1);
+
+        const current = this.communities[this.selectedCommunityIndex];
+
+        switch (command) {
+            case '/clear':
+                if (current) {
+                    current.messages = [];
+                    this.chatMessages = [];
+                    this.saveCommunitiesData();
+                }
+                return true;
+
+            case '/help':
+                if (current) {
+                    current.messages.push({
+                        sender: 'MoonBot',
+                        avatar: 'assets/images/iconMoon.png',
+                        badge: 'BOT',
+                        text: 'Available commands: /clear, /members, /join <room_index>, /help',
+                        timestamp: Date.now()
+                    });
+                }
+                return true;
+
+            case '/members':
+                if (current) {
+                    current.messages.push({
+                        sender: 'MoonBot',
+                        avatar: 'assets/images/iconMoon.png',
+                        badge: 'BOT',
+                        text: `Active members in #${current.name}: ${current.membersCount}`,
+                        timestamp: Date.now()
+                    });
+                }
+                return true;
+
+            case '/join':
+                const targetIdx = parseInt(args[0], 10);
+                if (!isNaN(targetIdx) && this.selectCommunity(targetIdx)) {
+                    return true;
+                }
+                return false;
+
+            default:
+                return false;
         }
     }
 
-    receiveMessage(msg) {
-        this.chatMessages.push(msg);
-        if (this.chatMessages.length > 100) {
-            this.chatMessages.shift();
-        }
-    }
-
-    handleInput(key, isPressed) {
-        if (!isPressed || !this.isActive) return;
-
-        switch (key) {
-            case 'w':
-            case 'arrowup':
-                this.changeSelection(-1);
-                break;
-            case 's':
-            case 'arrowdown':
-                this.changeSelection(1);
-                break;
-            case 'enter':
-                this.joinCommunity(this.selectedCommunityIndex);
-                break;
-            case 'escape':
-            case 'backspace':
-                this.close();
-                break;
-        }
-    }
-
-    changeSelection(change) {
-        if (this.communities.length === 0) return;
-
-        this.selectedCommunityIndex += change;
-        if (this.selectedCommunityIndex < 0) {
-            this.selectedCommunityIndex = this.communities.length - 1;
-        } else if (this.selectedCommunityIndex >= this.communities.length) {
-            this.selectedCommunityIndex = 0;
-        }
-    }
-
-    close() {
-        this.isActive = false;
-        if (this.online) {
-            this.online.disconnect();
-        }
-    }
-
-    update(elapsed) {
-    }
-
-    render(gl) {
+    getCurrentCommunity() {
+        return this.communities[this.selectedCommunityIndex] || null;
     }
 
     destroy() {
-        this.close();
+        this.communities = [];
+        this.chatMessages = [];
     }
 }
 
