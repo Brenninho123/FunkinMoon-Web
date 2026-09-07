@@ -534,7 +534,6 @@
             padding-top: 15px;
         }
 
-        /* ESCALONAMENTO E ZOOM MENOR PARA DISPOSITIVOS MOBILE */
         @media (max-width: 768px) {
             body {
                 padding: 6px;
@@ -553,7 +552,6 @@
                 margin-bottom: 12px;
             }
 
-            /* Redução do zoom dos botões do menu para preencher toda a tela */
             .story-mode-btn {
                 transform: scale(0.48);
                 margin: -32px 0;
@@ -688,18 +686,10 @@
         <footer>MoonEngine Web Edition &copy; Brenninho123</footer>
     </div>
 
-    <!-- Engine Core Scripts -->
-    <script src="source/funkin/Preferences.js"></script>
-    <script src="source/funkin/Paths.js"></script>
-    <script src="source/funkin/online/Online.js"></script>
-    <script src="source/funkin/api/discord/DiscordLogin.js"></script>
-    <script src="source/funkin/ui/community/CommunityMenu.js"></script>
-    <script src="source/funkin/ui/options/OptionsState.js"></script>
-    <script src="source/funkin/play/PlayState.js"></script>
-    <script src="source/Main.js"></script>
+    <script src="project.js"></script>
 
     <script>
-        const discordAuth = new DiscordLogin();
+        let discordAuth;
         let communitySystem = null;
         let selectedOption = null;
         let clickCounts = { story: 0, freeplay: 0, options: 0 };
@@ -866,6 +856,7 @@
         }, { passive: true });
 
         async function updateDiscordUI() {
+            if (!discordAuth) return;
             const user = await discordAuth.fetchUserData();
             const loginBtn = document.getElementById('discordLoginBtn');
             const userProfile = document.getElementById('userProfile');
@@ -883,14 +874,8 @@
 
         function logoutDiscord() {
             playSound('scrollMenu');
-            discordAuth.logout();
+            if (discordAuth) discordAuth.logout();
             updateDiscordUI();
-        }
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js');
-            });
         }
 
         const canvas = document.getElementById('starfield');
@@ -931,13 +916,26 @@
 
         window.addEventListener('resize', initCanvas);
         window.addEventListener('DOMContentLoaded', () => {
-            updateDiscordUI();
-            initCommunityUI();
-            updateFpsUI();
-            selectOption('story');
+            MoonProject.init();
+            MoonProject.loadScriptSequence(() => {
+                if (typeof DiscordLogin !== 'undefined') {
+                    discordAuth = new DiscordLogin();
+                }
+
+                updateDiscordUI();
+                initCommunityUI();
+                updateFpsUI();
+                selectOption('story');
+            });
         });
         initCanvas();
         drawStars();
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js');
+            });
+        }
     </script>
 </body>
 </html>
