@@ -1,9 +1,10 @@
-const CACHE_NAME = 'moon-engine-v2';
+const CACHE_NAME = 'moon-engine-v3';
 const STATIC_ASSETS = [
     './',
     './index.html',
     './manifest.json',
     './assets/images/iconMoon.png',
+    './assets/images/menuBG.png',
     './assets/sounds/scrollMenu.ogg',
     './source/funkin/Preferences.js',
     './source/funkin/Paths.js',
