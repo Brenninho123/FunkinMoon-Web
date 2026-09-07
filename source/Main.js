@@ -10,6 +10,7 @@ class MoonEngine {
         this.isRunning = false;
 
         this.currentState = null;
+        this.debugDisplay = null;
 
         this.assets = {
             images: new Map(),
@@ -27,6 +28,10 @@ class MoonEngine {
     init() {
         if (!this.canvas) return;
 
+        if (typeof Save !== 'undefined') {
+            Save.init();
+        }
+
         if (typeof Preferences !== 'undefined') {
             Preferences.init();
         }
@@ -41,6 +46,7 @@ class MoonEngine {
         }
 
         this.setupInputs();
+        this.setupDebugDisplay();
         this.preloadCoreAudio();
 
         this.loadInitialAssets().then(() => {
@@ -50,6 +56,12 @@ class MoonEngine {
             }
             this.startLoop();
         });
+    }
+
+    setupDebugDisplay() {
+        if (typeof FunkinDebugDisplay !== 'undefined') {
+            this.debugDisplay = new FunkinDebugDisplay(this);
+        }
     }
 
     preloadCoreAudio() {
@@ -99,6 +111,14 @@ class MoonEngine {
     setupInputs() {
         window.addEventListener('keydown', (e) => {
             const key = e.key.toLowerCase();
+
+            if (e.key === 'F3') {
+                e.preventDefault();
+                if (this.debugDisplay) {
+                    this.debugDisplay.toggle();
+                }
+            }
+
             if (!e.repeat) {
                 this.keysPressed.add(key);
                 this.handleInput(key, true);
@@ -191,6 +211,10 @@ class MoonEngine {
     update(dt) {
         if (this.currentState && typeof this.currentState.update === 'function') {
             this.currentState.update(dt);
+        }
+
+        if (this.debugDisplay) {
+            this.debugDisplay.update();
         }
     }
 
