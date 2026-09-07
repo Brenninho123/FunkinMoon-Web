@@ -76,7 +76,8 @@ class PreBuildPipeline {
 
         const rootFiles = [
             'index.html',
-            'manifest.json'
+            'manifest.json',
+            'project.js'
         ].filter(f => fs.existsSync(path.join(__dirname, f)))
          .map(f => ({
              path: `./${f}`,
