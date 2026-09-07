@@ -30,7 +30,14 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
             user-select: none;
+            -webkit-user-select: none;
+        }
+
+        input, textarea {
+            user-select: text !important;
+            -webkit-user-select: text !important;
         }
 
         body {
@@ -43,6 +50,7 @@
             padding: clamp(10px, 3vw, 40px);
             overflow-x: hidden;
             position: relative;
+            touch-action: manipulation;
         }
 
         #bg-layer {
@@ -104,7 +112,11 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+        }
+
+        .discord-btn:active {
+            transform: scale(0.95);
         }
 
         .discord-btn svg {
@@ -148,7 +160,7 @@
             position: relative;
             display: inline-block;
             margin-bottom: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
         }
 
         .header-logo {
@@ -189,6 +201,7 @@
             overflow-x: auto;
             white-space: nowrap;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
 
         .nav-tabs::-webkit-scrollbar {
@@ -302,6 +315,7 @@
             cursor: pointer;
             font-size: 0.85rem;
             color: var(--text-muted);
+            transition: all 0.2s ease;
         }
 
         .community-item.active {
@@ -514,7 +528,7 @@
         <h1>MoonEngine</h1>
         <p class="subtitle">Next-Gen Rhythm Gaming Engine</p>
 
-        <nav class="nav-tabs">
+        <nav class="nav-tabs" id="navTabs">
             <button class="tab-btn active" onclick="switchTab(event, 'game')">Play Engine</button>
             <button class="tab-btn" onclick="switchTab(event, 'community')">Community</button>
             <button class="tab-btn" onclick="switchTab(event, 'options')">Options</button>
@@ -597,7 +611,7 @@
         let communitySystem = null;
 
         function playMenuScrollSound() {
-            if (window.moonEngine) {
+            if (window.moonEngine && typeof window.moonEngine.playSound === 'function') {
                 window.moonEngine.playSound('scrollMenu');
             } else {
                 const audio = new Audio('assets/sounds/scrollMenu.ogg');
@@ -645,7 +659,8 @@
                 const li = document.createElement('li');
                 li.className = `community-item ${index === communitySystem.selectedCommunityIndex ? 'active' : ''}`;
                 li.textContent = `# ${comm.name}`;
-                li.onclick = () => {
+                li.onclick = (e) => {
+                    e.stopPropagation();
                     playMenuScrollSound();
                     communitySystem.joinCommunity(index);
                     renderCommunitiesList();
@@ -721,14 +736,17 @@
         });
 
         function switchTab(e, tabId) {
+            if (e && e.stopPropagation) e.stopPropagation();
             playMenuScrollSound();
 
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById(tabId).classList.add('active');
-            if (e && e.currentTarget) {
-                e.currentTarget.classList.add('active');
+            
+            const targetBtn = e ? e.currentTarget : null;
+            if (targetBtn) {
+                targetBtn.classList.add('active');
             }
 
             if (tabId === 'game' && window.moonEngine) {
@@ -789,11 +807,6 @@
             });
             requestAnimationFrame(drawStars);
         }
-
-        const gameCanvas = document.getElementById('gameCanvas');
-        gameCanvas.addEventListener('touchstart', () => {
-            playMenuScrollSound();
-        }, { passive: true });
 
         window.addEventListener('resize', initCanvas);
         window.addEventListener('DOMContentLoaded', () => {
