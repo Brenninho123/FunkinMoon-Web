@@ -35,11 +35,6 @@
             -webkit-user-select: none;
         }
 
-        input, textarea {
-            user-select: text !important;
-            -webkit-user-select: text !important;
-        }
-
         body {
             background-color: var(--bg-dark);
             color: var(--text-main);
@@ -115,10 +110,6 @@
             transition: all 0.2s ease;
         }
 
-        .discord-btn:active {
-            transform: scale(0.95);
-        }
-
         .discord-btn svg {
             width: 16px;
             height: 16px;
@@ -159,8 +150,8 @@
         .header-logo-container {
             position: relative;
             display: inline-block;
-            margin-bottom: 15px;
-            margin-top: 15px;
+            margin-bottom: 10px;
+            margin-top: 10px;
         }
 
         .header-logo {
@@ -189,62 +180,34 @@
             margin-bottom: 25px;
         }
 
-        .nav-tabs {
+        .main-menu-container {
             display: flex;
-            justify-content: flex-start;
-            gap: 8px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 25px;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 6px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            overflow-x: auto;
-            white-space: nowrap;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
         }
 
-        .nav-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 10px 18px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border-radius: 8px;
+        .story-mode-btn {
+            width: 615px;
+            height: 122px;
+            background-image: url('assets/images/mainmenu/storymode.png');
+            background-position: 0px -540px;
+            background-repeat: no-repeat;
             cursor: pointer;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
+            transition: transform 0.1s ease;
+            max-width: 100%;
         }
 
-        .tab-btn.active {
-            color: #ffffff;
-            background: var(--accent-purple);
-            box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
-        }
-
-        .tab-content {
-            display: none;
-            text-align: left;
-            animation: fadeIn 0.3s ease forwards;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
+        .story-mode-btn.selected {
+            width: 796px;
+            height: 173px;
+            background-position: 0px -363px;
         }
 
         .game-viewport {
             width: 100%;
-            height: clamp(300px, 55vh, 520px);
+            height: clamp(300px, 50vh, 480px);
             background: #000000;
             border-radius: 16px;
             overflow: hidden;
@@ -252,185 +215,17 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
             position: relative;
             touch-action: none;
+            display: none;
+        }
+
+        .game-viewport.active {
+            display: block;
         }
 
         #gameCanvas {
             width: 100%;
             height: 100%;
             display: block;
-        }
-
-        .community-layout {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            gap: 15px;
-            height: clamp(380px, 50vh, 480px);
-        }
-
-        .community-sidebar {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--moon-glow);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            padding-bottom: 8px;
-        }
-
-        .create-btn {
-            background: var(--accent-purple);
-            color: #ffffff;
-            border: none;
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 700;
-        }
-
-        .community-list {
-            list-style: none;
-            overflow-y: auto;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .community-item {
-            padding: 10px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.02);
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            transition: all 0.2s ease;
-        }
-
-        .community-item.active {
-            background: rgba(157, 78, 221, 0.25);
-            color: var(--text-main);
-        }
-
-        .chat-container {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .chat-messages {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .chat-message {
-            display: flex;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-
-        .chat-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: var(--accent-purple);
-            object-fit: cover;
-        }
-
-        .chat-input-bar {
-            display: flex;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.4);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            gap: 8px;
-        }
-
-        .chat-input {
-            flex-grow: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: #ffffff;
-            outline: none;
-            font-size: 0.9rem;
-        }
-
-        .chat-send-btn {
-            background: var(--accent-purple);
-            color: #ffffff;
-            border: none;
-            padding: 0 14px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .options-container {
-            background: rgba(0, 0, 0, 0.25);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
-
-        .option-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 10px;
-        }
-
-        .option-label {
-            font-size: 0.95rem;
-            font-weight: 600;
-        }
-
-        .option-control {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .option-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--cyan-accent);
-            min-width: 45px;
-            text-align: center;
-        }
-
-        .opt-btn {
-            background: var(--accent-purple);
-            color: #ffffff;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
         }
 
         .btn-container {
@@ -478,25 +273,18 @@
         }
 
         @media (max-width: 768px) {
+            .story-mode-btn {
+                transform: scale(0.65);
+            }
+            .story-mode-btn.selected {
+                transform: scale(0.65);
+            }
             .user-bar {
                 position: relative;
                 top: 0;
                 right: 0;
                 justify-content: center;
                 margin-bottom: 10px;
-            }
-
-            .community-layout {
-                grid-template-columns: 1fr;
-                height: auto;
-            }
-
-            .community-sidebar {
-                max-height: 150px;
-            }
-
-            .chat-container {
-                height: 300px;
             }
         }
     </style>
@@ -528,58 +316,12 @@
         <h1>MoonEngine</h1>
         <p class="subtitle">Next-Gen Rhythm Gaming Engine</p>
 
-        <nav class="nav-tabs" id="navTabs">
-            <button class="tab-btn active" onclick="switchTab(event, 'game')">Play Engine</button>
-            <button class="tab-btn" onclick="switchTab(event, 'community')">Community</button>
-            <button class="tab-btn" onclick="switchTab(event, 'options')">Options</button>
-            <button class="tab-btn" onclick="switchTab(event, 'overview')">Overview</button>
-            <button class="tab-btn" onclick="switchTab(event, 'features')">Features</button>
-        </nav>
-
-        <div id="game" class="tab-content active">
-            <div class="game-viewport">
-                <canvas id="gameCanvas"></canvas>
-            </div>
+        <div class="main-menu-container">
+            <div id="storyModeBtn" class="story-mode-btn" onclick="handleStoryModeClick()"></div>
         </div>
 
-        <div id="community" class="tab-content">
-            <div class="community-layout">
-                <div class="community-sidebar">
-                    <div class="sidebar-header">
-                        <span>Communities</span>
-                        <button class="create-btn" onclick="createNewCommunityPrompt()">+</button>
-                    </div>
-                    <ul id="communityList" class="community-list"></ul>
-                </div>
-                <div class="chat-container">
-                    <div id="chatMessages" class="chat-messages"></div>
-                    <div class="chat-input-bar">
-                        <input type="text" id="chatInput" class="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter') sendChatMessage()">
-                        <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="options" class="tab-content">
-            <div class="options-container">
-                <div class="option-row">
-                    <span class="option-label">FPS Limit</span>
-                    <div class="option-control">
-                        <button class="opt-btn" onclick="adjustFps(-30)">-</button>
-                        <span id="fpsValue" class="option-value">60</span>
-                        <button class="opt-btn" onclick="adjustFps(30)">+</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="overview" class="tab-content">
-            <p style="color: var(--text-muted); line-height: 1.6;">MoonEngine Web is built for high performance, custom chart support, and WebGL rendering directly inside modern mobile and desktop browsers.</p>
-        </div>
-
-        <div id="features" class="tab-content">
-            <p style="color: var(--text-muted); line-height: 1.6;">Supports WebGL Acceleration, PWA offline caching, dynamic Lua/Haxe stages, and integrated Discord authorization.</p>
+        <div id="gameViewport" class="game-viewport">
+            <canvas id="gameCanvas"></canvas>
         </div>
 
         <div class="btn-container">
@@ -608,15 +350,31 @@
 
     <script>
         const discordAuth = new DiscordLogin();
-        let communitySystem = null;
+        let storyModeClicks = 0;
 
-        function playMenuScrollSound() {
+        function playSound(soundName) {
             if (window.moonEngine && typeof window.moonEngine.playSound === 'function') {
-                window.moonEngine.playSound('scrollMenu');
+                window.moonEngine.playSound(soundName);
             } else {
-                const audio = new Audio('assets/sounds/scrollMenu.ogg');
+                const audio = new Audio(`assets/sounds/${soundName}.ogg`);
                 audio.volume = 0.6;
                 audio.play().catch(() => {});
+            }
+        }
+
+        function handleStoryModeClick() {
+            const btn = document.getElementById('storyModeBtn');
+            storyModeClicks++;
+
+            if (storyModeClicks === 1) {
+                btn.classList.add('selected');
+                playSound('scrollMenu');
+            } else if (storyModeClicks >= 2) {
+                playSound('confirmMenu');
+                document.getElementById('gameViewport').classList.add('active');
+                if (window.moonEngine) {
+                    window.moonEngine.resizeCanvas();
+                }
             }
         }
 
@@ -637,76 +395,9 @@
         }
 
         function logoutDiscord() {
-            playMenuScrollSound();
+            playSound('scrollMenu');
             discordAuth.logout();
             updateDiscordUI();
-        }
-
-        function initCommunityUI() {
-            if (typeof CommunityMenu !== 'undefined') {
-                communitySystem = new CommunityMenu(window.moonEngine);
-                communitySystem.create();
-                renderCommunitiesList();
-            }
-        }
-
-        function renderCommunitiesList() {
-            if (!communitySystem) return;
-            const listContainer = document.getElementById('communityList');
-            listContainer.innerHTML = '';
-
-            communitySystem.communities.forEach((comm, index) => {
-                const li = document.createElement('li');
-                li.className = `community-item ${index === communitySystem.selectedCommunityIndex ? 'active' : ''}`;
-                li.textContent = `# ${comm.name}`;
-                li.onclick = (e) => {
-                    e.stopPropagation();
-                    playMenuScrollSound();
-                    communitySystem.joinCommunity(index);
-                    renderCommunitiesList();
-                    renderChatMessages();
-                };
-                listContainer.appendChild(li);
-            });
-        }
-
-        function createNewCommunityPrompt() {
-            playMenuScrollSound();
-            const name = prompt('Enter community room name:');
-            if (name && communitySystem) {
-                communitySystem.createCommunity(name);
-                renderCommunitiesList();
-            }
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            if (input.value && communitySystem) {
-                communitySystem.sendMessage(input.value);
-                input.value = '';
-                renderChatMessages();
-            }
-        }
-
-        function renderChatMessages() {
-            if (!communitySystem) return;
-            const chatBox = document.getElementById('chatMessages');
-            chatBox.innerHTML = '';
-
-            communitySystem.chatMessages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-message';
-                msgDiv.innerHTML = `
-                    <img class="chat-avatar" src="${msg.avatar || 'assets/images/iconMoon.png'}" alt="Avatar">
-                    <div class="chat-body">
-                        <span class="chat-sender">${msg.sender}</span>
-                        <span class="chat-text">${msg.text}</span>
-                    </div>
-                `;
-                chatBox.appendChild(msgDiv);
-            });
-
-            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
         if ('serviceWorker' in navigator) {
@@ -725,7 +416,7 @@
         });
 
         installBtn.addEventListener('click', () => {
-            playMenuScrollSound();
+            playSound('scrollMenu');
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then(() => {
@@ -734,43 +425,6 @@
                 });
             }
         });
-
-        function switchTab(e, tabId) {
-            if (e && e.stopPropagation) e.stopPropagation();
-            playMenuScrollSound();
-
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(tabId).classList.add('active');
-            
-            const targetBtn = e ? e.currentTarget : null;
-            if (targetBtn) {
-                targetBtn.classList.add('active');
-            }
-
-            if (tabId === 'game' && window.moonEngine) {
-                window.moonEngine.resizeCanvas();
-            }
-        }
-
-        function updateFpsUI() {
-            if (typeof Preferences !== 'undefined') {
-                document.getElementById('fpsValue').textContent = Preferences.get('fps');
-            }
-        }
-
-        function adjustFps(delta) {
-            playMenuScrollSound();
-            if (typeof Preferences !== 'undefined') {
-                let current = Preferences.get('fps');
-                let next = current + delta;
-                if (next >= 30 && next <= 240) {
-                    Preferences.set('fps', next);
-                    updateFpsUI();
-                }
-            }
-        }
 
         const canvas = document.getElementById('starfield');
         const ctx = canvas.getContext('2d');
@@ -810,9 +464,7 @@
 
         window.addEventListener('resize', initCanvas);
         window.addEventListener('DOMContentLoaded', () => {
-            updateFpsUI();
             updateDiscordUI();
-            initCommunityUI();
         });
         initCanvas();
         drawStars();
