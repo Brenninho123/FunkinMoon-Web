@@ -45,9 +45,7 @@ class Main {
             this.frameInterval = 1000 / this.targetFPS;
         }
 
-        if (typeof PolyMod !== 'undefined') {
-            PolyMod.init();
-        }
+        this.initModdingSystem();
 
         this.setupNativeAPIs();
         this.setupInputListeners();
@@ -61,6 +59,17 @@ class Main {
         this.engineReady = true;
 
         this.loop(performance.now());
+    }
+
+    initModdingSystem() {
+        if (typeof PolyMod !== 'undefined') {
+            PolyMod.init();
+        }
+
+        if (typeof Mods !== 'undefined') {
+            Mods.loadSavedMods();
+            Mods.fetchCommunityCatalog();
+        }
     }
 
     setupNativeAPIs() {
@@ -87,6 +96,11 @@ class Main {
 
             if (e.key === 'F3' && this.debugDisplay) {
                 this.debugDisplay.toggle();
+            }
+
+            if (e.key === 'F5') {
+                e.preventDefault();
+                this.reloadActiveMod();
             }
 
             if (e.key === 'F11') {
@@ -141,6 +155,29 @@ class Main {
         }
     }
 
+    reloadActiveMod() {
+        if (typeof Mods !== 'undefined') {
+            const active = Mods.getActiveMod();
+            if (active) {
+                Mods.loadModFromPackage(active.id, `mods/${active.id}/pack.json`).then(() => {
+                    if (this.currentState && typeof this.currentState.create === 'function') {
+                        this.currentState.create();
+                    }
+                });
+            }
+        }
+    }
+
+    getAssetPath(path) {
+        if (typeof Mods !== 'undefined') {
+            return Mods.resolveModAsset(path);
+        }
+        if (typeof PolyMod !== 'undefined') {
+            return PolyMod.resolvePath(path);
+        }
+        return path;
+    }
+
     switchState(newState) {
         if (!newState) return;
 
@@ -187,17 +224,29 @@ class Main {
         this.conductor.bpm = newBPM;
         this.conductor.crotchet = ((60 / newBPM) * 1000);
         this.conductor.stepCrochet = (this.conductor.crotchet / 4);
+
+        if (typeof Conductor !== 'undefined') {
+            Conductor.changeBPM(newBPM);
+        }
     }
 
     updateConductor() {
         if (this.currentMusic && !this.currentMusic.paused) {
             this.conductor.songPosition = this.currentMusic.currentTime * 1000;
+            if (typeof Conductor !== 'undefined') {
+                Conductor.update(this.conductor.songPosition);
+            }
         }
     }
 
     playSound(soundName, volume = 0.6) {
-        const soundPath = typeof Paths !== 'undefined' ? Paths.sound(soundName) : `assets/sounds/${soundName}.ogg`;
-        
+        let rawPath = typeof Paths !== 'undefined' ? Paths.sound(soundName) : `assets/sounds/${soundName}.ogg`;
+        const soundPath = this.getAssetPath(rawPath);
+
+        if (typeof FunkinSound !== 'undefined') {
+            return FunkinSound.playOnce(soundName, volume);
+        }
+
         try {
             const audio = new Audio(soundPath);
             audio.volume = volume;
@@ -220,7 +269,13 @@ class Main {
             this.currentMusic = null;
         }
 
-        const musicPath = typeof Paths !== 'undefined' ? Paths.music(musicName) : `assets/music/${musicName}.ogg`;
+        let rawPath = typeof Paths !== 'undefined' ? Paths.music(musicName) : `assets/music/${musicName}.ogg`;
+        const musicPath = this.getAssetPath(rawPath);
+
+        if (typeof FunkinSound !== 'undefined') {
+            this.currentMusic = FunkinSound.playMusic(musicName, { volume, loop });
+            return;
+        }
 
         try {
             this.currentMusic = new Audio(musicPath);
