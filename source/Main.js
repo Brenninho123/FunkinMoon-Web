@@ -10,6 +10,7 @@ class Main {
         this.targetFPS = 60;
         this.frameInterval = 1000 / this.targetFPS;
         this.elapsed = 0;
+        this.isFocused = true;
 
         this.debugDisplay = null;
         this.audioCache = new Map();
@@ -50,6 +51,7 @@ class Main {
 
         this.setupNativeAPIs();
         this.setupInputListeners();
+        this.setupWindowListeners();
 
         if (typeof FunkinDebugDisplay !== 'undefined') {
             this.debugDisplay = new FunkinDebugDisplay(this);
@@ -102,11 +104,29 @@ class Main {
 
             this.handleGlobalInput(e.key, false);
         });
+    }
 
+    setupWindowListeners() {
         window.addEventListener('blur', () => {
+            this.isFocused = false;
             this.keys.pressed.clear();
             this.keys.justPressed.clear();
             this.keys.justReleased.clear();
+
+            if (this.currentMusic && !this.currentMusic.paused) {
+                this.currentMusic.pause();
+                this.wasMusicPlayingOnBlur = true;
+            }
+        });
+
+        window.addEventListener('focus', () => {
+            this.isFocused = true;
+            this.lastTime = performance.now();
+
+            if (this.wasMusicPlayingOnBlur && this.currentMusic) {
+                this.currentMusic.play().catch(() => {});
+                this.wasMusicPlayingOnBlur = false;
+            }
         });
     }
 
@@ -245,17 +265,19 @@ class Main {
                 }
             }
 
-            this.updateConductor();
+            if (this.isFocused) {
+                this.updateConductor();
 
-            if (this.subState) {
-                if (typeof this.subState.update === 'function') {
-                    this.subState.update(this.elapsed);
-                }
-                if (this.persistentUpdate && this.currentState && typeof this.currentState.update === 'function') {
+                if (this.subState) {
+                    if (typeof this.subState.update === 'function') {
+                        this.subState.update(this.elapsed);
+                    }
+                    if (this.persistentUpdate && this.currentState && typeof this.currentState.update === 'function') {
+                        this.currentState.update(this.elapsed);
+                    }
+                } else if (this.currentState && typeof this.currentState.update === 'function') {
                     this.currentState.update(this.elapsed);
                 }
-            } else if (this.currentState && typeof this.currentState.update === 'function') {
-                this.currentState.update(this.elapsed);
             }
 
             this.keys.justPressed.clear();
