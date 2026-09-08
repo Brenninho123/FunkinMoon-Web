@@ -60,9 +60,10 @@
             width: 100%;
             height: 100%;
             background: url('assets/images/menuBG.png') center/cover no-repeat;
-            opacity: 0.35;
+            opacity: 0.55;
             z-index: -2;
-            filter: blur(2px) contrast(1.1);
+            filter: contrast(1.1) brightness(0.9);
+            transition: transform 0.3s ease-out;
         }
 
         #starfield {
@@ -73,6 +74,68 @@
             height: 100%;
             z-index: -1;
             pointer-events: none;
+        }
+
+        #introOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 5, 10, 0.92);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.6s ease, visibility 0.6s;
+        }
+
+        #introOverlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .intro-logo {
+            width: clamp(100px, 20vw, 160px);
+            height: clamp(100px, 20vw, 160px);
+            object-fit: contain;
+            filter: drop-shadow(0 0 25px rgba(224, 170, 255, 0.8));
+            animation: pulseLogo 2s infinite ease-in-out;
+            margin-bottom: 20px;
+        }
+
+        .intro-title {
+            font-size: clamp(2rem, 6vw, 3.8rem);
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 20%, var(--moon-glow) 60%, var(--accent-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .intro-prompt {
+            font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+            color: var(--cyan-accent);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-weight: 700;
+            animation: blinkText 1.2s infinite alternate;
+        }
+
+        @keyframes pulseLogo {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(224, 170, 255, 0.6)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 35px rgba(0, 245, 212, 0.9)); }
+        }
+
+        @keyframes blinkText {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
         }
 
         #flashOverlay {
@@ -103,6 +166,14 @@
             position: relative;
             z-index: 1;
             overflow-y: auto;
+            opacity: 0;
+            transform: scale(0.95);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .container.visible {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .top-bar {
@@ -560,6 +631,12 @@
 </head>
 <body>
 
+    <div id="introOverlay" onclick="startEngineFromIntro()">
+        <img src="assets/images/iconMoon.png" alt="MoonEngine Logo" class="intro-logo">
+        <h1 class="intro-title">MoonEngine</h1>
+        <p class="intro-prompt">CLICK OR TAP TO START</p>
+    </div>
+
     <div id="bg-layer"></div>
     <canvas id="starfield"></canvas>
     <div id="flashOverlay"></div>
@@ -659,21 +736,23 @@
         let selectedOption = null;
         let clickCounts = { story: 0, freeplay: 0, options: 0 };
         let deferredPrompt = null;
-        let audioContextUnlocked = false;
+        let engineStarted = false;
 
-        function unlockAudioContext() {
-            if (audioContextUnlocked) return;
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                const ctx = new AudioContext();
-                ctx.resume().then(() => {
-                    audioContextUnlocked = true;
-                });
-            }
+        function startEngineFromIntro() {
+            if (engineStarted) return;
+            engineStarted = true;
+
+            const introOverlay = document.getElementById('introOverlay');
+            const menuContainer = document.getElementById('menuContainer');
+
+            triggerFlash();
+            playSound('confirmMenu');
+
+            introOverlay.classList.add('hidden');
+            setTimeout(() => {
+                menuContainer.classList.add('visible');
+            }, 300);
         }
-
-        document.addEventListener('touchstart', unlockAudioContext, { once: true });
-        document.addEventListener('click', unlockAudioContext, { once: true });
 
         function playSound(soundName) {
             if (window.moonEngine && typeof window.moonEngine.playSound === 'function') {
