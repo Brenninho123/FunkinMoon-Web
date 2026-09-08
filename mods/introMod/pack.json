@@ -1,0 +1,32 @@
+{
+  "id": "introMod",
+  "title": "Intro Mod Web Edition",
+  "author": "Brenninho123",
+  "version": "1.0.0",
+  "description": "Mod introdutório para o MoonEngine Web Edition com suporte a músicas e charts customizados.",
+  "icon": "assets/images/modIcon.png",
+  "banner": "assets/images/modBanner.png",
+  "restartEngine": false,
+  "runsGlobally": false,
+  "polyModManifest": {
+    "apiVersion": "1.0.0",
+    "modDependencies": {}
+  },
+  "songs": [
+    {
+      "name": "Tutorial",
+      "folder": "tutorial",
+      "bpm": 100,
+      "difficulties": ["easy", "normal", "hard"],
+      "week": 0,
+      "icon": "bf"
+    }
+  ],
+  "overrides": {
+    "assets/sounds/scrollMenu.ogg": "sounds/customScroll.ogg",
+    "assets/sounds/confirmMenu.ogg": "sounds/customConfirm.ogg"
+  },
+  "scripts": [
+    "scripts/introScript.lua"
+  ]
+}
