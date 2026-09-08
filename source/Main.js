@@ -1,87 +1,89 @@
-class MoonEngine {
-    constructor(canvasId) {
-        this.canvas = document.getElementById(canvasId);
-        this.gl = this.canvas ? (this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')) : null;
+class Main {
+    constructor() {
+        this.currentState = null;
+        this.nextState = null;
+        this.engineReady = false;
 
         this.lastTime = performance.now();
-        this.fps = 0;
-        this.frameCount = 0;
-        this.fpsTimer = 0;
-        this.isRunning = false;
+        this.targetFPS = 60;
+        this.frameInterval = 1000 / this.targetFPS;
 
-        this.currentState = null;
         this.debugDisplay = null;
-
-        this.assets = {
-            images: new Map(),
-            audio: new Map(),
-            json: new Map()
-        };
-
         this.audioCache = new Map();
-        this.keysPressed = new Set();
-        this.touchActive = false;
+        this.currentMusic = null;
 
         this.init();
     }
 
     init() {
-        if (!this.canvas) return;
-
-        if (typeof Save !== 'undefined') {
+        if (typeof Save !== 'undefined' && Save.init) {
             Save.init();
         }
 
         if (typeof Preferences !== 'undefined') {
-            Preferences.init();
+            this.targetFPS = Preferences.get('fps') || 60;
+            this.frameInterval = 1000 / this.targetFPS;
         }
 
-        this.resizeCanvas();
-        window.addEventListener('resize', () => this.resizeCanvas());
-
-        if (this.gl) {
-            this.gl.clearColor(0.02, 0.03, 0.06, 1.0);
-            this.gl.enable(this.gl.BLEND);
-            this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+        if (typeof PolyMod !== 'undefined') {
+            PolyMod.init();
         }
 
-        this.setupInputs();
-        this.setupDebugDisplay();
-        this.preloadCoreAudio();
+        this.setupNativeAPIs();
+        this.setupInputListeners();
 
-        this.loadInitialAssets().then(() => {
-            this.isRunning = true;
-            if (typeof PlayState !== 'undefined') {
-                this.switchState(new PlayState(this));
-            }
-            this.startLoop();
-        });
-    }
-
-    setupDebugDisplay() {
         if (typeof FunkinDebugDisplay !== 'undefined') {
             this.debugDisplay = new FunkinDebugDisplay(this);
         }
+
+        window.moonEngine = this;
+        this.engineReady = true;
+
+        this.loop(performance.now());
     }
 
-    preloadCoreAudio() {
-        const sounds = ['scrollMenu', 'confirmMenu'];
-        sounds.forEach(name => {
-            const path = typeof Paths !== 'undefined' ? Paths.sound(name) : `assets/sounds/${name}.ogg`;
-            const audio = new Audio(path);
-            audio.preload = 'auto';
-            this.audioCache.set(name, path);
+    setupNativeAPIs() {
+        if (typeof AndroidAPI !== 'undefined' && AndroidAPI.isAndroid) {
+            AndroidAPI.setKeepScreenOn(true);
+            AndroidAPI.registerBackButtonHandler(() => {
+                if (this.currentState && typeof this.currentState.handleInput === 'function') {
+                    this.currentState.handleInput('escape', true);
+                }
+            });
+        }
+
+        if (typeof WinAPI !== 'undefined' && WinAPI.isWindows) {
+            WinAPI.setWindowTitle('MoonEngine - Web Edition');
+            WinAPI.setDarkModeHeader(true);
+        }
+    }
+
+    setupInputListeners() {
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'F3' && this.debugDisplay) {
+                this.debugDisplay.toggle();
+            }
+
+            if (e.key === 'F11') {
+                e.preventDefault();
+                this.toggleFullScreen();
+            }
+
+            if (this.currentState && typeof this.currentState.handleInput === 'function') {
+                this.currentState.handleInput(e.key, true);
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (this.currentState && typeof this.currentState.handleInput === 'function') {
+                this.currentState.handleInput(e.key, false);
+            }
         });
     }
 
-    playSound(soundName, volume = 0.6) {
-        const path = this.audioCache.get(soundName) || (typeof Paths !== 'undefined' ? Paths.sound(soundName) : `assets/sounds/${soundName}.ogg`);
-        const audio = new Audio(path);
-        audio.volume = volume;
-        audio.play().catch(() => {});
-    }
-
     switchState(newState) {
+        if (!newState) return;
+
         if (this.currentState && typeof this.currentState.destroy === 'function') {
             this.currentState.destroy();
         }
@@ -93,146 +95,85 @@ class MoonEngine {
         }
     }
 
-    resizeCanvas() {
-        if (!this.canvas) return;
+    playSound(soundName, volume = 0.6) {
+        const soundPath = typeof Paths !== 'undefined' ? Paths.sound(soundName) : `assets/sounds/${soundName}.ogg`;
+        
+        try {
+            const audio = new Audio(soundPath);
+            audio.volume = volume;
+            audio.play().catch(() => {});
+        } catch (e) {
+        }
+    }
 
-        const displayWidth = this.canvas.clientWidth || window.innerWidth;
-        const displayHeight = this.canvas.clientHeight || window.innerHeight;
+    playMusic(musicName, volume = 0.5, loop = true) {
+        if (this.currentMusic) {
+            this.currentMusic.pause();
+            this.currentMusic = null;
+        }
 
-        if (this.canvas.width !== displayWidth || this.canvas.height !== displayHeight) {
-            this.canvas.width = displayWidth;
-            this.canvas.height = displayHeight;
-            if (this.gl) {
-                this.gl.viewport(0, 0, displayWidth, displayHeight);
+        const musicPath = typeof Paths !== 'undefined' ? Paths.music(musicName) : `assets/music/${musicName}.ogg`;
+
+        try {
+            this.currentMusic = new Audio(musicPath);
+            this.currentMusic.volume = volume;
+            this.currentMusic.loop = loop;
+            this.currentMusic.play().catch(() => {});
+        } catch (e) {
+        }
+    }
+
+    stopMusic() {
+        if (this.currentMusic) {
+            this.currentMusic.pause();
+            this.currentMusic = null;
+        }
+    }
+
+    toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
             }
         }
     }
 
-    setupInputs() {
-        window.addEventListener('keydown', (e) => {
-            const key = e.key.toLowerCase();
+    loop(currentTime) {
+        requestAnimationFrame((time) => this.loop(time));
 
-            if (e.key === 'F3') {
-                e.preventDefault();
-                if (this.debugDisplay) {
-                    this.debugDisplay.toggle();
+        const elapsed = currentTime - this.lastTime;
+
+        if (elapsed >= this.frameInterval) {
+            const dt = elapsed / 1000;
+            this.lastTime = currentTime - (elapsed % this.frameInterval);
+
+            if (typeof Preferences !== 'undefined') {
+                const target = Preferences.get('fps');
+                if (target && target !== this.targetFPS) {
+                    this.targetFPS = target;
+                    this.frameInterval = 1000 / this.targetFPS;
                 }
             }
 
-            if (!e.repeat) {
-                this.keysPressed.add(key);
-                this.handleInput(key, true);
+            if (this.currentState && typeof this.currentState.update === 'function') {
+                this.currentState.update(dt);
             }
-        });
 
-        window.addEventListener('keyup', (e) => {
-            const key = e.key.toLowerCase();
-            this.keysPressed.delete(key);
-            this.handleInput(key, false);
-        });
-
-        if (this.canvas) {
-            this.canvas.addEventListener('touchstart', (e) => {
-                this.touchActive = true;
-                this.handleTouch(e, 'start');
-            }, { passive: true });
-
-            this.canvas.addEventListener('touchend', (e) => {
-                this.touchActive = false;
-                this.handleTouch(e, 'end');
-            }, { passive: true });
-        }
-    }
-
-    handleInput(key, isPressed) {
-        if (this.currentState && typeof this.currentState.handleInput === 'function') {
-            this.currentState.handleInput(key, isPressed);
-        }
-    }
-
-    handleTouch(event, type) {
-        if (this.currentState && typeof this.currentState.handleTouch === 'function') {
-            this.currentState.handleTouch(event, type);
-        }
-    }
-
-    async loadInitialAssets() {
-        const iconPath = typeof Paths !== 'undefined' ? Paths.image('iconMoon') : 'assets/images/iconMoon.png';
-        await this.loadImage('iconMoon', iconPath).catch(() => {});
-    }
-
-    loadImage(key, src) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => {
-                this.assets.images.set(key, img);
-                resolve(img);
-            };
-            img.onerror = (err) => reject(err);
-            img.src = src;
-        });
-    }
-
-    startLoop() {
-        this.lastTime = performance.now();
-        requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
-    }
-
-    gameLoop(timestamp) {
-        if (!this.isRunning) return;
-
-        const targetFps = typeof Preferences !== 'undefined' ? Preferences.get('fps') : 60;
-        const frameInterval = 1000 / targetFps;
-        const elapsed = timestamp - this.lastTime;
-
-        if (elapsed >= frameInterval) {
-            const deltaTime = Math.min(elapsed / 1000, 0.1);
-            this.lastTime = timestamp - (elapsed % frameInterval);
-
-            this.calculateFPS(deltaTime);
-            this.update(deltaTime);
-            this.render();
-        }
-
-        requestAnimationFrame((t) => this.gameLoop(t));
-    }
-
-    calculateFPS(deltaTime) {
-        this.fpsTimer += deltaTime;
-        this.frameCount++;
-
-        if (this.fpsTimer >= 1.0) {
-            this.fps = this.frameCount;
-            this.frameCount = 0;
-            this.fpsTimer -= 1.0;
-        }
-    }
-
-    update(dt) {
-        if (this.currentState && typeof this.currentState.update === 'function') {
-            this.currentState.update(dt);
-        }
-
-        if (this.debugDisplay) {
-            this.debugDisplay.update();
-        }
-    }
-
-    render() {
-        if (!this.gl) return;
-
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-
-        if (this.currentState && typeof this.currentState.render === 'function') {
-            this.currentState.render(this.gl);
+            if (this.debugDisplay) {
+                this.debugDisplay.update();
+            }
         }
     }
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    window.moonEngine = new MoonEngine('gameCanvas');
+    if (typeof MoonProject !== 'undefined') {
+        MoonProject.init();
+    }
 });
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = MoonEngine;
+    module.exports = Main;
 }
