@@ -326,6 +326,20 @@
             background-position: 0px -351px;
         }
 
+        .mods-btn {
+            width: 347px;
+            height: 125px;
+            background-image: url('assets/images/mainmenu/mods.png');
+            background-position: -391px -186px;
+            background-repeat: no-repeat;
+        }
+
+        .mods-btn.selected {
+            width: 395px;
+            height: 183px;
+            background-position: -394px 0px;
+        }
+
         .options-btn {
             width: 487px;
             height: 111px;
@@ -340,7 +354,7 @@
             background-position: 0px -329px;
         }
 
-        .document-modal {
+        .document-modal, .mods-modal {
             display: none;
             text-align: left;
             background: rgba(8, 12, 24, 0.92);
@@ -350,23 +364,66 @@
             margin-bottom: 15px;
         }
 
-        .document-modal.active {
+        .document-modal.active, .mods-modal.active {
             display: block;
         }
 
-        .document-modal h2 {
+        .mods-modal h2 {
             color: var(--moon-glow);
             font-size: 1.1rem;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             border-bottom: 1px solid var(--border-glow);
             padding-bottom: 4px;
         }
 
-        .document-modal p {
+        .mods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .mod-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+        }
+
+        .mod-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .mod-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .mod-author {
+            font-size: 0.75rem;
             color: var(--text-muted);
-            line-height: 1.4;
-            font-size: 0.85rem;
-            margin-bottom: 6px;
+        }
+
+        .mod-play-btn {
+            background: var(--accent-purple);
+            color: #ffffff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 4px;
         }
 
         .community-container {
@@ -614,7 +671,7 @@
                 margin-bottom: 10px;
             }
 
-            .story-mode-btn, .freeplay-btn, .options-btn {
+            .story-mode-btn, .freeplay-btn, .mods-btn, .options-btn {
                 transform: scale(0.42);
                 margin: -35px 0;
             }
@@ -678,14 +735,27 @@
         <div class="main-menu-container">
             <div id="storyModeBtn" class="menu-item-btn story-mode-btn" onclick="selectOption('story')"></div>
             <div id="freeplayBtn" class="menu-item-btn freeplay-btn" onclick="selectOption('freeplay')"></div>
+            <div id="modsBtn" class="menu-item-btn mods-btn" onclick="selectOption('mods')"></div>
             <div id="optionsBtn" class="menu-item-btn options-btn" onclick="selectOption('options')"></div>
         </div>
 
         <div id="storyDocument" class="document-modal">
             <h2>📜 Moon Engine Specification Document</h2>
-            <p><strong>Version:</strong> Web Edition v1.3.0</p>
+            <p><strong>Version:</strong> Web Edition v1.4.0</p>
             <p><strong>Architecture:</strong> WebGL accelerated canvas with asynchronous chart parsing and event-driven Lua script handling.</p>
             <p><strong>Status:</strong> Engine initialized. PWA caching active with offline mode support.</p>
+        </div>
+
+        <div id="modsModal" class="mods-modal">
+            <h2>🧩 Available Community Mods</h2>
+            <div id="modsGrid" class="mods-grid">
+                <div class="mod-card">
+                    <img src="assets/images/iconMoon.png" class="mod-icon" alt="IntroMod">
+                    <span class="mod-title">Intro Mod</span>
+                    <span class="mod-author">By Brenninho123</span>
+                    <button class="mod-play-btn" onclick="launchMod('introMod')">Play Mod</button>
+                </div>
+            </div>
         </div>
 
         <div id="communityContainer" class="community-container">
@@ -739,7 +809,7 @@
         let communitySystem = null;
         let debugDisplay = null;
         let selectedOption = null;
-        let clickCounts = { story: 0, freeplay: 0, options: 0 };
+        let clickCounts = { story: 0, freeplay: 0, mods: 0, options: 0 };
         let deferredPrompt = null;
         let engineStarted = false;
 
@@ -784,9 +854,11 @@
         function selectOption(opt) {
             const storyBtn = document.getElementById('storyModeBtn');
             const freeplayBtn = document.getElementById('freeplayBtn');
+            const modsBtn = document.getElementById('modsBtn');
             const optionsBtn = document.getElementById('optionsBtn');
 
             const docModal = document.getElementById('storyDocument');
+            const modsModal = document.getElementById('modsModal');
             const communityContainer = document.getElementById('communityContainer');
             const optionsPanel = document.getElementById('optionsPanel');
 
@@ -797,9 +869,11 @@
 
                 storyBtn.classList.toggle('selected', opt === 'story');
                 freeplayBtn.classList.toggle('selected', opt === 'freeplay');
+                modsBtn.classList.toggle('selected', opt === 'mods');
                 optionsBtn.classList.toggle('selected', opt === 'options');
 
                 docModal.classList.remove('active');
+                modsModal.classList.remove('active');
                 communityContainer.classList.remove('active');
                 optionsPanel.classList.remove('active');
             } else {
@@ -813,10 +887,24 @@
                         window.moonEngine.switchState(freeplayState);
                     } else {
                         docModal.classList.toggle('active', opt === 'story');
+                        modsModal.classList.toggle('active', opt === 'mods');
                         communityContainer.classList.toggle('active', opt === 'freeplay');
                         optionsPanel.classList.toggle('active', opt === 'options');
                     }
                 }
+            }
+        }
+
+        function launchMod(modId) {
+            playSound('confirmMenu');
+            triggerFlash();
+            if (typeof Mods !== 'undefined') {
+                Mods.loadModFromPackage(modId, `mods/${modId}/pack.json`).then(success => {
+                    if (success) {
+                        Mods.setActiveMod(modId);
+                        alert(`Mod ${modId} loaded successfully!`);
+                    }
+                });
             }
         }
 
@@ -917,7 +1005,7 @@
             const diffY = touchStartY - touchEndY;
 
             if (Math.abs(diffY) > 40) {
-                const optionsList = ['story', 'freeplay', 'options'];
+                const optionsList = ['story', 'freeplay', 'mods', 'options'];
                 let currentIndex = optionsList.indexOf(selectedOption);
 
                 if (diffY > 0) {
