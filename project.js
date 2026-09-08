@@ -1,6 +1,6 @@
 const projectConfig = {
     name: 'MoonEngine',
-    version: '1.2.0-web',
+    version: '1.3.0-web',
     author: 'Brenninho123',
     repository: 'https://github.com/Brenninho123/Funkin-Moon',
     discordServer: 'https://discord.gg/CEvNkkrgDX',
@@ -23,6 +23,10 @@ const projectConfig = {
         'source/funkin/online/Online.js',
         'source/funkin/api/discord/DiscordLogin.js',
         'source/funkin/api/youtube/YoutubeChannels.js',
+        'source/funkin/external/android/AndroidAPI.js',
+        'source/funkin/external/windows/WinAPI.js',
+        'source/funkin/modding/PolyMod.js',
+        'source/funkin/modding/module/Module.js',
         'source/funkin/ui/community/CommunityMenu.js',
         'source/funkin/ui/options/OptionsState.js',
         'source/funkin/ui/debug/FunkinDebugDisplay.js',
@@ -36,7 +40,9 @@ const projectConfig = {
         sounds: 'assets/sounds/',
         music: 'assets/music/',
         fonts: 'assets/fonts/',
-        songs: 'assets/songs/'
+        songs: 'assets/songs/',
+        stages: 'assets/stages/',
+        characters: 'assets/characters/'
     }
 };
 
