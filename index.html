@@ -64,6 +64,7 @@
             z-index: -2;
             filter: contrast(1.1) brightness(0.9);
             transition: transform 0.3s ease-out;
+            will-change: transform;
         }
 
         #starfield {
@@ -289,8 +290,12 @@
 
         .menu-item-btn {
             cursor: pointer;
-            transition: transform 0.15s ease;
+            transition: transform 0.15s ease, filter 0.15s ease;
             max-width: 100%;
+        }
+
+        .menu-item-btn:active {
+            transform: scale(0.96);
         }
 
         .story-mode-btn {
@@ -741,6 +746,10 @@
         function startEngineFromIntro() {
             if (engineStarted) return;
             engineStarted = true;
+
+            if (navigator.vibrate) {
+                navigator.vibrate(40);
+            }
 
             const introOverlay = document.getElementById('introOverlay');
             const menuContainer = document.getElementById('menuContainer');
