@@ -1,8 +1,16 @@
-const APP_VERSION = 'v10';
-const CORE_CACHE = `moon-core-${APP_VERSION}`;
-const MEDIA_CACHE = `moon-media-${APP_VERSION}`;
-const DYNAMIC_CACHE = `moon-dynamic-${APP_VERSION}`;
-const MAX_DYNAMIC_ITEMS = 200;
+const APP_VERSION = 'v11';
+const CACHE_NAMES = {
+    core: `moon-core-${APP_VERSION}`,
+    media: `moon-media-${APP_VERSION}`,
+    dynamic: `moon-dynamic-${APP_VERSION}`,
+    songs: `moon-songs-${APP_VERSION}`
+};
+
+const MAX_CACHE_ENTRIES = {
+    dynamic: 250,
+    media: 300,
+    songs: 100
+};
 
 const CORE_ASSETS = [
     './',
@@ -33,28 +41,28 @@ const CORE_ASSETS = [
     './source/Main.js'
 ];
 
-const limitCacheSize = (name, size) => {
-    caches.open(name).then(cache => {
-        cache.keys().then(keys => {
-            if (keys.length > size) {
-                cache.delete(keys[0]).then(() => limitCacheSize(name, size));
-            }
-        });
-    });
+const pruneCache = async (cacheName, maxItems) => {
+    const cache = await caches.open(cacheName);
+    const keys = await cache.keys();
+    if (keys.length > maxItems) {
+        await cache.delete(keys[0]);
+        await pruneCache(cacheName, maxItems);
+    }
 };
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
     event.waitUntil(
-        caches.open(CORE_CACHE).then((cache) => cache.addAll(CORE_ASSETS))
+        caches.open(CACHE_NAMES.core).then((cache) => cache.addAll(CORE_ASSETS))
     );
 });
 
 self.addEventListener('activate', (event) => {
+    const allowedCaches = Object.values(CACHE_NAMES);
     event.waitUntil(
         caches.keys().then((keys) => Promise.all(
             keys.map((key) => {
-                if (![CORE_CACHE, MEDIA_CACHE, DYNAMIC_CACHE].includes(key)) {
+                if (!allowedCaches.includes(key)) {
                     return caches.delete(key);
                 }
             })
@@ -69,66 +77,117 @@ self.addEventListener('fetch', (event) => {
     if (request.method !== 'GET' || !url.origin.includes(self.location.origin)) return;
 
     if (request.headers.has('range')) {
-        event.respondWith(
-            caches.match(request).then(cachedResponse => {
-                if (!cachedResponse) return fetch(request);
-                return cachedResponse.arrayBuffer().then(buffer => {
-                    const rangeHeader = request.headers.get('range');
-                    const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
-                    const start = parseInt(match[1], 10);
-                    const end = match[2] ? parseInt(match[2], 10) : buffer.byteLength - 1;
-                    const sliced = buffer.slice(start, end + 1);
-                    return new Response(sliced, {
-                        status: 206,
-                        statusText: 'Partial Content',
-                        headers: {
-                            'Content-Range': `bytes ${start}-${end}/${buffer.byteLength}`,
-                            'Content-Length': sliced.byteLength,
-                            'Content-Type': cachedResponse.headers.get('content-type') || 'audio/ogg',
-                            'Accept-Ranges': 'bytes'
-                        }
-                    });
-                });
-            }).catch(() => fetch(request))
-        );
+        event.respondWith(handleRangeRequest(request));
+        return;
+    }
+
+    if (url.pathname.includes('/assets/songs/')) {
+        event.respondWith(handleSongAssets(request));
         return;
     }
 
     if (request.destination === 'image' || request.destination === 'audio' || url.pathname.endsWith('.ogg')) {
-        event.respondWith(
-            caches.match(request).then((cached) => {
-                return cached || fetch(request).then((res) => {
-                    if (res && res.status === 200) {
-                        const clone = res.clone();
-                        caches.open(MEDIA_CACHE).then((cache) => cache.put(request, clone));
-                    }
-                    return res;
-                });
-            })
-        );
+        event.respondWith(handleMediaAssets(request));
         return;
     }
 
-    event.respondWith(
-        caches.match(request).then((cached) => {
-            const networkPromise = fetch(request).then((res) => {
-                if (res && res.status === 200) {
-                    const clone = res.clone();
-                    caches.open(DYNAMIC_CACHE).then((cache) => {
-                        cache.put(request, clone);
-                        limitCacheSize(DYNAMIC_CACHE, MAX_DYNAMIC_ITEMS);
-                    });
-                }
-                return res;
-            }).catch(() => {
-                if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
-                    return caches.match('./index.html');
-                }
-            });
-            return cached || networkPromise;
-        })
-    );
+    if (url.pathname.endsWith('.json') || url.pathname.endsWith('.xml') || url.pathname.endsWith('.lua')) {
+        event.respondWith(handleNetworkFirstData(request));
+        return;
+    }
+
+    event.respondWith(handleStaleWhileRevalidate(request));
 });
+
+async function handleRangeRequest(request) {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+        const buffer = await cachedResponse.arrayBuffer();
+        const rangeHeader = request.headers.get('range');
+        const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+        const start = parseInt(match[1], 10);
+        const end = match[2] ? parseInt(match[2], 10) : buffer.byteLength - 1;
+        const sliced = buffer.slice(start, end + 1);
+
+        return new Response(sliced, {
+            status: 206,
+            statusText: 'Partial Content',
+            headers: {
+                'Content-Range': `bytes ${start}-${end}/${buffer.byteLength}`,
+                'Content-Length': sliced.byteLength,
+                'Content-Type': cachedResponse.headers.get('content-type') || 'audio/ogg',
+                'Accept-Ranges': 'bytes'
+            }
+        });
+    }
+    return fetch(request);
+}
+
+async function handleSongAssets(request) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    try {
+        const res = await fetch(request);
+        if (res && res.status === 200) {
+            const cache = await caches.open(CACHE_NAMES.songs);
+            cache.put(request, res.clone());
+            pruneCache(CACHE_NAMES.songs, MAX_CACHE_ENTRIES.songs);
+        }
+        return res;
+    } catch (e) {
+        return cached;
+    }
+}
+
+async function handleMediaAssets(request) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
+    try {
+        const res = await fetch(request);
+        if (res && res.status === 200) {
+            const cache = await caches.open(CACHE_NAMES.media);
+            cache.put(request, res.clone());
+            pruneCache(CACHE_NAMES.media, MAX_CACHE_ENTRIES.media);
+        }
+        return res;
+    } catch (e) {
+        return cached;
+    }
+}
+
+async function handleNetworkFirstData(request) {
+    try {
+        const networkRes = await fetch(request);
+        if (networkRes && networkRes.status === 200) {
+            const cache = await caches.open(CACHE_NAMES.dynamic);
+            cache.put(request, networkRes.clone());
+            pruneCache(CACHE_NAMES.dynamic, MAX_CACHE_ENTRIES.dynamic);
+        }
+        return networkRes;
+    } catch (e) {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+    }
+}
+
+async function handleStaleWhileRevalidate(request) {
+    const cached = await caches.match(request);
+    const networkPromise = fetch(request).then(async (res) => {
+        if (res && res.status === 200) {
+            const cache = await caches.open(CACHE_NAMES.core);
+            cache.put(request, res.clone());
+        }
+        return res;
+    }).catch(() => {
+        if (request.headers.get('accept') && request.headers.get('accept').includes('text/html')) {
+            return caches.match('./index.html');
+        }
+    });
+
+    return cached || networkPromise;
+}
 
 self.addEventListener('message', (event) => {
     if (!event.data) return;
