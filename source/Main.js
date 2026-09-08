@@ -1,16 +1,35 @@
 class Main {
     constructor() {
         this.currentState = null;
-        this.nextState = null;
-        this.engineReady = false;
+        this.subState = null;
+        this.persistentUpdate = true;
+        this.persistentDraw = true;
 
+        this.engineReady = false;
         this.lastTime = performance.now();
         this.targetFPS = 60;
         this.frameInterval = 1000 / this.targetFPS;
+        this.elapsed = 0;
 
         this.debugDisplay = null;
         this.audioCache = new Map();
+        this.imageCache = new Map();
         this.currentMusic = null;
+        this.activeSounds = new Set();
+
+        this.conductor = {
+            songPosition: 0,
+            bpm: 100,
+            crotchet: ((60 / 100) * 1000),
+            stepCrochet: (((60 / 100) * 1000) / 4),
+            lastSongPos: 0
+        };
+
+        this.keys = {
+            pressed: new Set(),
+            justPressed: new Set(),
+            justReleased: new Set()
+        };
 
         this.init();
     }
@@ -46,9 +65,7 @@ class Main {
         if (typeof AndroidAPI !== 'undefined' && AndroidAPI.isAndroid) {
             AndroidAPI.setKeepScreenOn(true);
             AndroidAPI.registerBackButtonHandler(() => {
-                if (this.currentState && typeof this.currentState.handleInput === 'function') {
-                    this.currentState.handleInput('escape', true);
-                }
+                this.handleGlobalInput('escape', true);
             });
         }
 
@@ -60,6 +77,12 @@ class Main {
 
     setupInputListeners() {
         window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (!this.keys.pressed.has(key)) {
+                this.keys.justPressed.add(key);
+            }
+            this.keys.pressed.add(key);
+
             if (e.key === 'F3' && this.debugDisplay) {
                 this.debugDisplay.toggle();
             }
@@ -69,20 +92,41 @@ class Main {
                 this.toggleFullScreen();
             }
 
-            if (this.currentState && typeof this.currentState.handleInput === 'function') {
-                this.currentState.handleInput(e.key, true);
-            }
+            this.handleGlobalInput(e.key, true);
         });
 
         window.addEventListener('keyup', (e) => {
-            if (this.currentState && typeof this.currentState.handleInput === 'function') {
-                this.currentState.handleInput(e.key, false);
-            }
+            const key = e.key.toLowerCase();
+            this.keys.pressed.delete(key);
+            this.keys.justReleased.add(key);
+
+            this.handleGlobalInput(e.key, false);
         });
+
+        window.addEventListener('blur', () => {
+            this.keys.pressed.clear();
+            this.keys.justPressed.clear();
+            this.keys.justReleased.clear();
+        });
+    }
+
+    handleGlobalInput(key, isPressed) {
+        if (this.subState && typeof this.subState.handleInput === 'function') {
+            this.subState.handleInput(key, isPressed);
+            return;
+        }
+
+        if (this.currentState && typeof this.currentState.handleInput === 'function') {
+            this.currentState.handleInput(key, isPressed);
+        }
     }
 
     switchState(newState) {
         if (!newState) return;
+
+        if (this.subState) {
+            this.closeSubState();
+        }
 
         if (this.currentState && typeof this.currentState.destroy === 'function') {
             this.currentState.destroy();
@@ -95,14 +139,58 @@ class Main {
         }
     }
 
+    openSubState(targetSubState) {
+        if (!targetSubState) return;
+
+        if (this.subState && typeof this.subState.destroy === 'function') {
+            this.subState.destroy();
+        }
+
+        this.subState = targetSubState;
+
+        if (this.subState && typeof this.subState.create === 'function') {
+            this.subState.create();
+        }
+    }
+
+    closeSubState() {
+        if (!this.subState) return;
+
+        if (typeof this.subState.destroy === 'function') {
+            this.subState.destroy();
+        }
+
+        this.subState = null;
+    }
+
+    setBPM(newBPM) {
+        this.conductor.bpm = newBPM;
+        this.conductor.crotchet = ((60 / newBPM) * 1000);
+        this.conductor.stepCrochet = (this.conductor.crotchet / 4);
+    }
+
+    updateConductor() {
+        if (this.currentMusic && !this.currentMusic.paused) {
+            this.conductor.songPosition = this.currentMusic.currentTime * 1000;
+        }
+    }
+
     playSound(soundName, volume = 0.6) {
         const soundPath = typeof Paths !== 'undefined' ? Paths.sound(soundName) : `assets/sounds/${soundName}.ogg`;
         
         try {
             const audio = new Audio(soundPath);
             audio.volume = volume;
+            this.activeSounds.add(audio);
+
+            audio.onended = () => {
+                this.activeSounds.delete(audio);
+            };
+
             audio.play().catch(() => {});
+            return audio;
         } catch (e) {
+            return null;
         }
     }
 
@@ -146,7 +234,7 @@ class Main {
         const elapsed = currentTime - this.lastTime;
 
         if (elapsed >= this.frameInterval) {
-            const dt = elapsed / 1000;
+            this.elapsed = elapsed / 1000;
             this.lastTime = currentTime - (elapsed % this.frameInterval);
 
             if (typeof Preferences !== 'undefined') {
@@ -157,9 +245,21 @@ class Main {
                 }
             }
 
-            if (this.currentState && typeof this.currentState.update === 'function') {
-                this.currentState.update(dt);
+            this.updateConductor();
+
+            if (this.subState) {
+                if (typeof this.subState.update === 'function') {
+                    this.subState.update(this.elapsed);
+                }
+                if (this.persistentUpdate && this.currentState && typeof this.currentState.update === 'function') {
+                    this.currentState.update(this.elapsed);
+                }
+            } else if (this.currentState && typeof this.currentState.update === 'function') {
+                this.currentState.update(this.elapsed);
             }
+
+            this.keys.justPressed.clear();
+            this.keys.justReleased.clear();
 
             if (this.debugDisplay) {
                 this.debugDisplay.update();
