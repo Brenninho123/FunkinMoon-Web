@@ -1,4 +1,4 @@
-const APP_VERSION = 'v11';
+const APP_VERSION = 'v12';
 const CACHE_NAMES = {
     core: `moon-core-${APP_VERSION}`,
     media: `moon-media-${APP_VERSION}`,
@@ -33,6 +33,10 @@ const CORE_ASSETS = [
     './source/funkin/online/Online.js',
     './source/funkin/api/discord/DiscordLogin.js',
     './source/funkin/api/youtube/YoutubeChannels.js',
+    './source/funkin/external/android/AndroidAPI.js',
+    './source/funkin/external/windows/WinAPI.js',
+    './source/funkin/modding/PolyMod.js',
+    './source/funkin/modding/module/Module.js',
     './source/funkin/ui/community/CommunityMenu.js',
     './source/funkin/ui/options/OptionsState.js',
     './source/funkin/ui/debug/FunkinDebugDisplay.js',
