@@ -1,4 +1,4 @@
-const APP_VERSION = 'v12';
+const APP_VERSION = 'v14';
 const CACHE_NAMES = {
     core: `moon-core-${APP_VERSION}`,
     media: `moon-media-${APP_VERSION}`,
@@ -21,6 +21,7 @@ const CORE_ASSETS = [
     './assets/images/menuBG.png',
     './assets/images/mainmenu/storymode.png',
     './assets/images/mainmenu/freeplay.png',
+    './assets/images/mainmenu/mods.png',
     './assets/images/mainmenu/options.png',
     './assets/sounds/scrollMenu.ogg',
     './assets/sounds/confirmMenu.ogg',
@@ -30,6 +31,9 @@ const CORE_ASSETS = [
     './source/funkin/save/Save.js',
     './source/funkin/Paths.js',
     './source/funkin/data/Data.js',
+    './source/funkin/audio/FunkinSound.js',
+    './source/funkin/backend/Conductor.js',
+    './source/funkin/backend/Mods.js',
     './source/funkin/online/Online.js',
     './source/funkin/api/discord/DiscordLogin.js',
     './source/funkin/api/youtube/YoutubeChannels.js',
