@@ -17,6 +17,8 @@ class Main {
         this.imageCache = new Map();
         this.currentMusic = null;
         this.activeSounds = new Set();
+        this.eventListeners = new Map();
+        this.globalPlugins = new Map();
 
         this.conductor = {
             songPosition: 0,
@@ -46,10 +48,10 @@ class Main {
         }
 
         this.initModdingSystem();
-
         this.setupNativeAPIs();
         this.setupInputListeners();
         this.setupWindowListeners();
+        this.setupResizeHandler();
 
         if (typeof FunkinDebugDisplay !== 'undefined') {
             this.debugDisplay = new FunkinDebugDisplay(this);
@@ -58,7 +60,7 @@ class Main {
         window.moonEngine = this;
         this.engineReady = true;
 
-        this.loop(performance.now());
+        requestAnimationFrame((time) => this.loop(time));
     }
 
     initModdingSystem() {
@@ -81,7 +83,7 @@ class Main {
         }
 
         if (typeof WinAPI !== 'undefined' && WinAPI.isWindows) {
-            WinAPI.setWindowTitle('MoonEngine - Web Edition');
+            WinAPI.setWindowTitle('MoonEngine - Advanced Web Edition');
             WinAPI.setDarkModeHeader(true);
         }
     }
@@ -144,7 +146,67 @@ class Main {
         });
     }
 
+    setupResizeHandler() {
+        window.addEventListener('resize', () => {
+            this.emit('resize', { width: window.innerWidth, height: window.innerHeight });
+        });
+    }
+
+    registerPlugin(id, pluginInstance) {
+        if (!id || !pluginInstance) return false;
+        if (typeof pluginInstance.init === 'function') {
+            pluginInstance.init(this);
+        }
+        this.globalPlugins.set(id, pluginInstance);
+        this.emit('pluginRegistered', id);
+        return true;
+    }
+
+    unregisterPlugin(id) {
+        if (!this.globalPlugins.has(id)) return false;
+        const instance = this.globalPlugins.get(id);
+        if (typeof instance.destroy === 'function') {
+            instance.destroy();
+        }
+        this.globalPlugins.delete(id);
+        this.emit('pluginUnregistered', id);
+        return true;
+    }
+
+    getPlugin(id) {
+        return this.globalPlugins.get(id) || null;
+    }
+
+    on(event, callback) {
+        if (!this.eventListeners.has(event)) {
+            this.eventListeners.set(event, new Set());
+        }
+        this.eventListeners.get(event).add(callback);
+    }
+
+    off(event, callback) {
+        if (this.eventListeners.has(event)) {
+            this.eventListeners.get(event).delete(callback);
+        }
+    }
+
+    emit(event, data) {
+        if (this.eventListeners.has(event)) {
+            for (const callback of this.eventListeners.get(event)) {
+                try {
+                    callback(data);
+                } catch (e) {}
+            }
+        }
+    }
+
     handleGlobalInput(key, isPressed) {
+        for (const [_, plugin] of this.globalPlugins) {
+            if (typeof plugin.handleInput === 'function') {
+                if (plugin.handleInput(key, isPressed)) return;
+            }
+        }
+
         if (this.subState && typeof this.subState.handleInput === 'function') {
             this.subState.handleInput(key, isPressed);
             return;
@@ -163,6 +225,7 @@ class Main {
                     if (this.currentState && typeof this.currentState.create === 'function') {
                         this.currentState.create();
                     }
+                    this.emit('modReloaded', active.id);
                 });
             }
         }
@@ -186,13 +249,18 @@ class Main {
         }
 
         if (this.currentState && typeof this.currentState.destroy === 'function') {
-            this.currentState.destroy();
+            try {
+                this.currentState.destroy();
+            } catch (e) {}
         }
 
         this.currentState = newState;
+        this.emit('stateChange', newState);
 
         if (this.currentState && typeof this.currentState.create === 'function') {
-            this.currentState.create();
+            try {
+                this.currentState.create();
+            } catch (e) {}
         }
     }
 
@@ -204,6 +272,7 @@ class Main {
         }
 
         this.subState = targetSubState;
+        this.emit('subStateOpen', targetSubState);
 
         if (this.subState && typeof this.subState.create === 'function') {
             this.subState.create();
@@ -218,6 +287,7 @@ class Main {
         }
 
         this.subState = null;
+        this.emit('subStateClose');
     }
 
     setBPM(newBPM) {
@@ -228,6 +298,7 @@ class Main {
         if (typeof Conductor !== 'undefined') {
             Conductor.changeBPM(newBPM);
         }
+        this.emit('bpmChange', newBPM);
     }
 
     updateConductor() {
@@ -282,8 +353,7 @@ class Main {
             this.currentMusic.volume = volume;
             this.currentMusic.loop = loop;
             this.currentMusic.play().catch(() => {});
-        } catch (e) {
-        }
+        } catch (e) {}
     }
 
     stopMusic() {
@@ -309,7 +379,7 @@ class Main {
         const elapsed = currentTime - this.lastTime;
 
         if (elapsed >= this.frameInterval) {
-            this.elapsed = elapsed / 1000;
+            this.elapsed = Math.min(elapsed / 1000, 0.1);
             this.lastTime = currentTime - (elapsed % this.frameInterval);
 
             if (typeof Preferences !== 'undefined') {
@@ -322,6 +392,12 @@ class Main {
 
             if (this.isFocused) {
                 this.updateConductor();
+
+                for (const [_, plugin] of this.globalPlugins) {
+                    if (typeof plugin.update === 'function') {
+                        plugin.update(this.elapsed);
+                    }
+                }
 
                 if (this.subState) {
                     if (typeof this.subState.update === 'function') {
